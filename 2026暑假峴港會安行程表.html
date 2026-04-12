@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 暑假・峴港・會安 旅遊行程表</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hoi:#1A5C38;--hoi-l:#E9F5EE;
+  --da:#1A3A5C;--da-l:#E8F0FA;
+  --tr:#7B3F00;--tr-l:#FFF3CD;
+  --warn:#C0392B;--warn-l:#FDECEA;
+  --gold:#7A5B00;--gold-l:#FFF8E1;
+  --ink:#1C1C1C;--muted:#6B7280;--border:#E5E7EB;
+  --bg:#F8F5F0;--white:#fff;
+  --r:10px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.7}
+a{color:#1A73E8;text-decoration:none}a:hover{text-decoration:underline}
+
+.hero{background:linear-gradient(140deg,#0A3020,#1A5C38 55%,#0D2E4A);color:#fff;padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0 5.5 4.5 10 10 10s10-4.5 10-10-4.5-10-10-10-10 4.5-10 10z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+.hero h1{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:700;position:relative}
+.hero p{opacity:.85;margin-top:8px;font-size:.92rem;position:relative}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;position:relative}
+.chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 14px;font-size:.8rem}
+
+nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;display:flex;overflow-x:auto}
+.nt{padding:12px 20px;font-size:.85rem;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .18s}
+.nt.on,.nt:hover{color:var(--hoi);border-bottom-color:var(--hoi)}
+
+.pane{display:none;padding:28px 16px;max-width:1260px;margin:0 auto}
+.pane.on{display:block}
+
+.sec{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:var(--r);color:#fff;font-weight:700;font-size:.92rem;margin:20px 0 12px}
+.s-hoi{background:var(--hoi)}.s-tr{background:var(--tr)}.s-da{background:var(--da)}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden;display:grid;grid-template-columns:66px 1fr 200px 130px 240px}
+.dc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 6px;color:#fff;text-align:center}
+.dc b{font-family:'Noto Serif TC',serif;font-size:1.1rem}
+.dc small{font-size:.72rem;opacity:.78;margin-top:2px}
+.choi{background:var(--hoi)}.ctr{background:var(--tr)}.cda{background:var(--da)}
+.col{padding:12px 14px;border-left:1px solid var(--border);font-size:.83rem}
+.ctl{font-weight:700;font-size:.88rem;margin-bottom:7px}
+.sub{font-size:.75rem;color:var(--muted);margin-bottom:5px;margin-top:6px}
+.li{padding-left:13px;position:relative;margin-bottom:3px;color:#444}
+.li::before{content:'•';position:absolute;left:0;color:var(--muted)}
+.li.g::before{color:var(--hoi)}
+.li.w{color:var(--warn);font-weight:600}.li.w::before{content:'⚠'}
+.nb{border-left:3px solid var(--hoi);background:var(--hoi-l);padding:5px 9px;border-radius:0 5px 5px 0;font-size:.78rem;color:var(--hoi);margin-top:6px}
+.nb.w{border-color:var(--warn);background:var(--warn-l);color:var(--warn)}
+.nb.g{border-color:var(--gold);background:var(--gold-l);color:var(--gold)}
+.hn{font-weight:700;font-size:.86rem;line-height:1.4}
+
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.bk{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.bk-h{display:flex;align-items:center;gap:8px;padding:11px 15px;background:#F5F5F5;border-bottom:1px solid var(--border)}
+.bd{font-size:.73rem;padding:2px 9px;border-radius:20px;font-weight:700;color:#fff}
+.bdhoi{background:var(--hoi)}.bdda{background:var(--da)}.bdw{background:var(--warn)}
+.bk-t{font-weight:700;font-size:.88rem}
+.bk-b{padding:13px 15px;font-size:.83rem}
+.bl{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px;margin-top:8px}
+.bv{line-height:1.6}
+.lk{display:block;margin:3px 0;font-size:.82rem}
+.ab{background:var(--warn-l);border-left:3px solid var(--warn);padding:7px 10px;border-radius:0 5px 5px 0;font-size:.79rem;color:var(--warn);font-weight:600;margin-top:8px}
+.ib{background:var(--hoi-l);border-left:3px solid var(--hoi);padding:7px 10px;border-radius:0 5px 5px 0;font-size:.79rem;color:var(--hoi);margin-top:8px}
+
+table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:8px}
+th{background:#1F3864;color:#fff;padding:9px 11px;text-align:left;font-weight:600}
+td{padding:7px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:#F9F9F9}
+tr:last-child td{border-bottom:none}
+.tot{background:#1F3864;color:#fff;border-radius:var(--r);padding:12px 18px;font-size:.98rem;font-weight:700;margin:8px 0;display:flex;justify-content:space-between}
+.sub-bar{border-radius:8px;padding:10px 16px;font-size:.92rem;font-weight:700;color:#fff;margin:6px 0 14px}
+.sb-da{background:var(--da)}.sb-pu{background:#6A4C9C}.sb-dk{background:#1F3864}
+.fm{background:var(--hoi-l);border-left:4px solid var(--hoi);padding:11px 15px;border-radius:0 var(--r) var(--r) 0;font-size:.85rem;color:var(--hoi);font-weight:600;margin:0 0 20px}
+.cs{margin-bottom:28px}
+.cs h3{font-size:.97rem;font-weight:700;padding-bottom:7px;border-bottom:2px solid;margin-bottom:12px}
+.h3-hoi{border-color:var(--hoi);color:var(--hoi)}.h3-da{border-color:var(--da);color:var(--da)}.h3-dk{border-color:var(--ink);color:var(--ink)}.h3-pu{border-color:#6A4C9C;color:#6A4C9C}
+
+.rh{font-size:.92rem;font-weight:700;padding:8px 14px;border-radius:var(--r);color:#fff;margin-bottom:10px}
+.rh-hoi{background:var(--hoi)}.rh-da{background:var(--da)}.rh-hue{background:#5C4A1A}
+
+.src-list{list-style:none}
+.src-list li{padding:9px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;font-size:.85rem}
+.src-list li:last-child{border-bottom:none}
+.sb2{font-size:.7rem;padding:2px 8px;border-radius:20px;background:var(--da-l);color:var(--da);white-space:nowrap;font-weight:600}
+
+.tb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.tb{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px}
+.tb-h{font-weight:700;font-size:.87rem;margin-bottom:7px}
+.tb-b{font-size:.83rem;color:#444;line-height:1.65}
+
+@media(max-width:860px){
+  .card{grid-template-columns:58px 1fr}
+  .col:nth-child(n+4){grid-column:2}
+  .hero h1{font-size:1.5rem}
+  .bk-grid,.tb-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🇻🇳 2026 暑假・峴港・會安 旅遊行程表</h1>
+  <p>7/18（六）出發 → 7/28（二）返台｜11天10夜｜先會安・後峴港</p>
+  <div class="chips">
+    <span class="chip">✈ 峴港 DAD</span>
+    <span class="chip">🏡 會安 5晚 / 峴港 6晚</span>
+    <span class="chip">💱 1 NTD ≈ 760-800 VND</span>
+  </div>
+</div>
+
+<nav>
+  <button class="nt on" onclick="sw('itin',this)">📅 行程</button>
+  <button class="nt" onclick="sw('book',this)">🎫 預訂手冊</button>
+  <button class="nt" onclick="sw('cost',this)">💰 費用預估</button>
+  <button class="nt" onclick="sw('rest',this)">🍜 餐廳推薦</button>
+  <button class="nt" onclick="sw('taboo',this)">⚠ 文化禁忌</button>
+  <button class="nt" onclick="sw('src',this)">🔗 資料來源</button>
+</nav>
+
+<!-- ITINERARY -->
+<div id="itin" class="pane on">
+
+<div class="sec s-hoi">🌿 第一段：會安 Hội An（7/18–7/22）｜MaiChi Villa</div>
+
+<div class="card">
+  <div class="dc choi"><b>7/18</b><small>（六）</small></div>
+  <div class="col"><div class="ctl">抵達峴港 → 直奔會安</div>
+    <div class="li g">08:50 機場降落，Grab 直接前往會安</div>
+    <div class="li">辦理入住 MaiChi Villa</div>
+    <div class="li">下午 古城漫步：日本橋・福建會館</div>
+    <div class="li g">17:10 / 17:30 迷你秀</div>
+    <div class="li g">20:00–21:00 ★ 印象大秀「會安記憶」</div>
+  </div>
+  <div class="col"><div class="sub">交通</div>
+    <div class="li">Grab Car 機場→會安：NTD 560-650（45-55分）</div>
+    <div class="li">古城區：步行為主</div>
+  </div>
+  <div class="col"><div class="hn">MaiChi Villa<br><span style="font-weight:400;font-size:.78rem;">（會安，入住）</span></div></div>
+  <div class="col"><div class="sub">餐廳</div>
+    <div class="li">晚餐：MẸT Hội An</div>
+    <div class="li">點心：Bánh Mì Phượng</div>
+    <div class="nb w">Klook 印象秀 ≈ NTD 620，現場 720</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc choi"><b>7/19</b><small>（日）</small></div>
+  <div class="col"><div class="ctl">★ 占婆島一日遊</div>
+    <div class="li g">07:30 飯店接送出發（含午餐）</div>
+    <div class="li">占婆博物館＋漁村・浮潛・游泳</div>
+    <div class="li">15:00 返回</div>
+    <div class="li">下午 安邦海灘放鬆</div>
+    <div class="nb g">⚠ 今天需預訂 7/21 VinWonders 接駁！</div>
+  </div>
+  <div class="col"><div class="li">含接送：NTD 990/人起</div>
+    <div class="li">安邦 Grab：NTD 65-100</div>
+  </div>
+  <div class="col"><div class="hn">MaiChi Villa</div></div>
+  <div class="col"><div class="li">午餐：占婆島海鮮（含）</div>
+    <div class="li">晚餐：Morning Glory Original</div>
+    <div class="li" style="color:#888;font-size:.78rem;">會安三寶・米其林</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc choi"><b>7/20</b><small>（一）</small></div>
+  <div class="col"><div class="ctl">美山聖地 → 椰子船 → 懷河放水燈</div>
+    <div class="li g">07:00 出發美山聖地（UNESCO）</div>
+    <div class="li">返回約 11:00</div>
+    <div class="li g">午後 迦南島椰子船</div>
+    <div class="li g">傍晚 懷河放水燈</div>
+  </div>
+  <div class="col"><div class="li">包車含等候：NTD 500-700</div>
+    <div class="li">美山門票：150k ≈ NTD 195</div>
+  </div>
+  <div class="col"><div class="hn">MaiChi Villa</div></div>
+  <div class="col"><div class="li">早餐：Cơm Gà Ba Buội 薑黃雞肉飯</div>
+    <div class="li">晚餐：Pho Xua（近懷河）</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc choi"><b>7/21</b><small>（二）</small></div>
+  <div class="col"><div class="ctl">★ VinWonders 珍珠島（全日）</div>
+    <div class="li g">09:00 免費接駁出發（7/19預約）</div>
+    <div class="li">水上樂園・文化表演・遊樂設施</div>
+    <div class="li">18:00 接駁返回</div>
+    <div class="li">越式洗髮體驗</div>
+  </div>
+  <div class="col"><div class="li">An Bang 09:10 / Vinpearl 09:00</div>
+    <div class="li">門票：約 NTD 1,200-1,500</div>
+    <div class="nb w">7/19 務必預約接駁，僅此一班</div>
+  </div>
+  <div class="col"><div class="hn">MaiChi Villa<br><span style="font-weight:400;font-size:.78rem;">（最後一晚）</span></div></div>
+  <div class="col"><div class="li">午餐：園區餐廳（自理）</div>
+    <div class="li">晚餐：Mì Quảng Ông Hai 廣南麵</div>
+  </div>
+</div>
+
+<div class="sec s-tr" style="margin-top:20px;">🚗 移動日（7/22）：會安 → 峴港（直達）｜入住 Sala Danang Beach Hotel</div>
+
+<div class="card">
+  <div class="dc ctr"><b>7/22</b><small>（三）</small></div>
+  <div class="col"><div class="ctl">移動日：直達峴港</div>
+    <div class="li">上午 古城最後散步</div>
+    <div class="li g">中午 退房，Grab 直達峴港飯店</div>
+    <div class="li">先安頓休息，視體力決定下午</div>
+    <div class="sub">體力足 → 美溪沙灘散步</div>
+    <div class="sub">稍累 → 飯店泳池</div>
+    <div class="sub">很累 → 整理休息即可</div>
+    <div class="nb">★ 移動日以安頓為優先</div>
+  </div>
+  <div class="col"><div class="li">Grab 直達：NTD 430-550（40-50分）</div>
+    <div class="li">美溪沙灘距飯店步行5分</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel<br><span style="font-weight:400;font-size:.78rem;">（峴港，入住）</span></div></div>
+  <div class="col"><div class="li">午餐：Bánh Mì Phượng 外帶</div>
+    <div class="li">晚餐：Pizza 4P's 換口味</div>
+  </div>
+</div>
+
+<div class="sec s-da" style="margin-top:20px;">🌊 第二段：峴港 Đà Nẵng（7/22–7/28）｜Sala Danang Beach Hotel</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/23</b><small>（四）</small></div>
+  <div class="col"><div class="ctl">峴港市區 + 五行山</div>
+    <div class="li g">粉紅教堂・占婆博物館</div>
+    <div class="li">漢市場附近銀樓換錢（匯率最佳）</div>
+    <div class="li">越共咖啡 椰奶冰沙</div>
+    <div class="li g">下午 五行山（水山＋陰府洞）</div>
+  </div>
+  <div class="col"><div class="li">市區各點 Grab：NTD 65-180</div>
+    <div class="li">五行山：水山40k+電梯15k+陰府洞40k ≈ NTD 120</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel</div></div>
+  <div class="col"><div class="li">午餐：Bún Chả Cá 109</div>
+    <div class="li">晚餐：Madame Lan 蘭夫人</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/24</b><small>（五）</small></div>
+  <div class="col"><div class="ctl">★ 順化一日遊（遺跡觀光列車）</div>
+    <div class="li g">07:50 遺跡列車 HD 出發</div>
+    <div class="li">海雲關壯麗景色・抵達約10:50</div>
+    <div class="li g">順化皇城（UNESCO）</div>
+    <div class="li g">啟定皇陵</div>
+    <div class="li">18:00 Limo Minivan 返回</div>
+    <div class="nb w">⚠ 6/24 準時訂票！列車一票難求</div>
+  </div>
+  <div class="col"><div class="li">去程：180k VND ≈ NTD 230</div>
+    <div class="li">回程 Minivan：NTD 300</div>
+    <div class="li">皇城200k + 啟定150k ≈ NTD 455</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel</div></div>
+  <div class="col"><div class="li">順化午餐：Bún Bò Huế 牛肉粉</div>
+    <div class="li">點心：Bánh Bèo 米糕碟（NTD 20-40）</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/25</b><small>（六）</small></div>
+  <div class="col"><div class="ctl">休閒半日 + 龍橋噴火（週六！）</div>
+    <div class="li g">上午 美溪沙灘，孩子玩水</div>
+    <div class="li">下午 越共咖啡 / 共市場踩點</div>
+    <div class="li g">21:00 ★ 龍橋噴火秀（週六限定）</div>
+    <div class="nb w">今天輕鬆！明天巴拿山要早起！</div>
+  </div>
+  <div class="col"><div class="li">沙灘：步行5分（免費）</div>
+    <div class="li">龍橋：步行或 NTD 65（免費秀）</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel</div></div>
+  <div class="col"><div class="li">午餐：Bún Chả Cá 109</div>
+    <div class="li">晚餐：Hải Sản Bé Mặn 海鮮大排檔</div>
+    <div class="nb w">龍橋 21:00，提早佔位</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/26</b><small>（日）</small></div>
+  <div class="col"><div class="ctl">★★ 巴拿山全日遊 — 孩子最快樂！</div>
+    <div class="li g">07:00 出發，08:00 開園即抵</div>
+    <div class="li g">黃金佛手橋・法國村</div>
+    <div class="li g">奇幻樂園（室內設施全免費！）</div>
+    <div class="li">高山滑車 70k VND</div>
+    <div class="nb w">出發前查山頂天氣，非市區天氣！</div>
+  </div>
+  <div class="col"><div class="li">包車：NTD 650-900</div>
+    <div class="li">門票含纜車：900k ≈ NTD 1,150</div>
+    <div class="li">放倒數第3天，天氣差還有備案</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel</div></div>
+  <div class="col"><div class="li">午餐：Lotteria / Beer Plaza（山上）</div>
+    <div class="li">晚餐：LUK LAK（米其林推薦）</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/27</b><small>（一）</small></div>
+  <div class="col"><div class="ctl">上午輕鬆 + 下午漢市場採購</div>
+    <div class="sub">上午選一：</div>
+    <div class="li g">A 美溪沙灘最後一遊</div>
+    <div class="li">B 山茶半島靈應寺（67m觀音）</div>
+    <div class="li">C 飯店泳池休息</div>
+    <div class="sub">下午 漢市場＋共市場（2-3小時）</div>
+    <div class="li">越南咖啡・腰果・藤編包</div>
+    <div class="li">議價至少 6 折以下</div>
+  </div>
+  <div class="col"><div class="li">美溪：步行5分（免費）</div>
+    <div class="li">山茶半島：NTD 130-200（免費）</div>
+    <div class="li">漢市場 Grab：NTD 100-150</div>
+  </div>
+  <div class="col"><div class="hn">Sala Danang<br>Beach Hotel<br><span style="font-weight:400;font-size:.78rem;">（最後一晚）</span></div></div>
+  <div class="col"><div class="li">午餐：漢市場二樓熟食區</div>
+    <div class="li">晚餐：Hải Sản Bé Mặn 或 LUK LAK</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="dc cda"><b>7/28</b><small>（二）</small></div>
+  <div class="col"><div class="ctl">最後收尾 → 17:35 搭機返台</div>
+    <div class="li">上午 美溪沙灘最後散步</div>
+    <div class="li">中午退房，最後補購</div>
+    <div class="li g">最晚 15:00 出發機場</div>
+    <div class="li g">17:35 DAD → 21:25 TPE</div>
+  </div>
+  <div class="col"><div class="li">飯店→機場 Grab：NTD 130-200</div>
+    <div class="nb w">⚠ 最晚 15:00 出發！</div>
+  </div>
+  <div class="col"><div class="hn">退房 → 機場</div></div>
+  <div class="col"><div class="li">早餐：飯店或海邊咖啡廳</div>
+    <div class="li">午餐：Bún Chả Cá 109（補漏）</div>
+  </div>
+</div>
+
+</div><!-- /itin -->
+
+<!-- BOOKING -->
+<div id="book" class="pane">
+<div class="bk-grid">
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdw">全程</span><span class="bk-t">① 越南電子簽證 eVisa</span></div>
+  <div class="bk-b">
+    <div class="bl">建議時間</div><div class="bv">出發前 2 週完成（最晚 1 週）</div>
+    <div class="bl">費用</div><div class="bv">USD 25/人（單次，90天有效）</div>
+    <div class="bl">備件</div><div class="bv">護照（效期6個月以上）＋護照照片</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://evisa.gov.vn/" target="_blank">🔗 越南官方 eVisa 申請網站</a>
+    <div class="ab">操作：網站 → Apply New Visa → 填護照資料 → 上傳照片 → 繳費 → 下載 PDF</div>
+  </div>
+</div>
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdhoi">7/18</span><span class="bk-t">② 會安印象大秀 Eco 票</span></div>
+  <div class="bk-b">
+    <div class="bl">演出</div><div class="bv">主秀 20:00–21:00｜迷你秀 17:10/17:30</div>
+    <div class="bl">費用</div><div class="bv">Klook ≈ NTD 620｜現場 ≈ NTD 720</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://www.klook.com/zh-TW/search/?query=%E6%9C%83%E5%AE%89%E5%8D%B0%E8%B1%A1" target="_blank">🔗 Klook 會安印象樂園門票</a>
+    <div class="ib">購票後截圖 QR Code 備用。迷你秀工作人員推立牌時立即掃碼搶位。</div>
+  </div>
+</div>
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdhoi">7/19</span><span class="bk-t">③ 占婆島一日遊</span></div>
+  <div class="bk-b">
+    <div class="bl">含項目</div><div class="bv">飯店接送・浮潛裝備・海鮮午餐</div>
+    <div class="bl">費用</div><div class="bv">約 NTD 990/人起｜07:30 出發</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://www.klook.com/zh-TW/search/?query=%E5%8D%A0%E5%A9%86%E5%B3%B6+%E4%B8%80%E6%97%A5%E9%81%8A" target="_blank">🔗 Klook 占婆島一日遊</a>
+    <a class="lk" href="https://www.kkday.com/zh-tw/product/1977" target="_blank">🔗 KKday 占婆島一日遊</a>
+    <div class="ib">自備：泳衣、毛巾、防曬。確認飯店接送地址（MaiChi Villa）</div>
+  </div>
+</div>
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdhoi">7/21</span><span class="bk-t">④ VinWonders 珍珠島接駁＋門票</span></div>
+  <div class="bk-b">
+    <div class="bl">免費接駁</div><div class="bv">An Bang 09:10 / Vinpearl 09:00（7/19 預約）</div>
+    <div class="bl">門票</div><div class="bv">約 NTD 1,200-1,500（Klook 提前購）</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://vinwonders.com/vinwonders-nam-hoi-an" target="_blank">🔗 VinWonders 官方網站</a>
+    <a class="lk" href="https://www.klook.com/zh-TW/search/?query=VinWonders" target="_blank">🔗 Klook VinWonders 門票</a>
+    <div class="ab">接駁預約：電話 1900 6677（按 #5）。7/19 務必預約，僅此一班！</div>
+  </div>
+</div>
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdda">7/26</span><span class="bk-t">⑤ 巴拿山門票（含纜車）</span></div>
+  <div class="bk-b">
+    <div class="bl">含項目</div><div class="bv">來回纜車、黃金佛手橋、法國村、奇幻樂園</div>
+    <div class="bl">費用</div><div class="bv">900k VND ≈ NTD 1,150（KKday 2025/11）</div>
+    <div class="bl">接駁</div><div class="bv">Klook 共乘 NTD 210 來回，去 08:30 / 回 16:30</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://www.kkday.com/zh-tw/product/26212" target="_blank">🔗 KKday 巴拿山門票（含接駁）</a>
+    <a class="lk" href="https://www.klook.com/zh-TW/activity/13283-ba-na-hills-ticket-da-nang/" target="_blank">🔗 Klook 巴拿山（含接駁）</a>
+    <div class="ab">出發前務必查山頂天氣（非峴港市區天氣）！</div>
+  </div>
+</div>
+
+<div class="bk">
+  <div class="bk-h"><span class="bd bdda">7/24</span><span class="bk-t">⑥ 順化遺跡觀光列車 HD</span></div>
+  <div class="bk-b">
+    <div class="bl">班次</div><div class="bv">07:50 峴港 → 順化，車程約 3 小時</div>
+    <div class="bl">費用</div><div class="bv">180k VND ≈ NTD 230/人｜出發前1個月開放訂票</div>
+    <div class="bl">回程</div><div class="bv">Limo Minivan 18:00，NTD 300/人</div>
+    <div class="bl">訂票連結</div>
+    <a class="lk" href="https://www.baolau.com/en/" target="_blank">🔗 Baolau 去程（Da Nang → Hue，選 HD 07:50）</a>
+    <a class="lk" href="https://www.bookaway.com/" target="_blank">🔗 bookaway 回程（Hue → Da Nang，選 18:00）</a>
+    <div class="ab">★ 建議 6/24 準時上線搶票，此班需求量極大！</div>
+  </div>
+</div>
+
+</div>
+</div><!-- /book -->
+
+<!-- COST -->
+<div id="cost" class="pane">
+<div class="fm">💡 出發總費用 ＝ 共用費用（NTD 23,255）＋（大人人數 × NTD 10,428）＋（小孩人數 × NTD 7,743）</div>
+
+<div class="cs">
+<h3 class="h3-dk">① 全家共用費用（整趟固定支出，依人數平攤）</h3>
+<table>
+  <tr><th>項目</th><th>費用（NTD）</th><th>說明</th></tr>
+  <tr><td>MaiChi Villa 會安（5晚 × NTD 1,500）</td><td>7,500</td><td>每房計</td></tr>
+  <tr><td>Sala Danang Beach Hotel 峴港（6晚 × NTD 2,000）</td><td>12,000</td><td>每房計</td></tr>
+  <tr><td>機場→會安 Grab（7/18）</td><td>600</td><td>全車計</td></tr>
+  <tr><td>會安市區 Grab 各日（4天 × NTD 200）</td><td>800</td><td>全車計</td></tr>
+  <tr><td>會安→峴港飯店 Grab（7/22）</td><td>480</td><td>含行李</td></tr>
+  <tr><td>峴港市區 Grab 各日（6天 × NTD 150）</td><td>900</td><td>全車計</td></tr>
+  <tr><td>美山聖地包車來回（7/20）</td><td>600</td><td>含等候</td></tr>
+  <tr><td>巴拿山共乘接駁（7/26）</td><td>210</td><td>NTD 210/車</td></tr>
+  <tr><td>峴港→機場 Grab（7/28）</td><td>165</td><td>全車計</td></tr>
+  <tr><td>VinWonders 免費接駁</td><td>0</td><td>提前預約，免費</td></tr>
+</table>
+<div class="tot"><span>全家共用費用小計</span><span>NTD 23,255</span></div>
+</div>
+
+<div class="cs">
+<h3 class="h3-da">② 每位大人費用（× 大人人數）</h3>
+<table>
+  <tr><th>項目</th><th>每位大人（NTD）</th><th>備註</th></tr>
+  <tr><td>越南電子簽證 eVisa</td><td>700</td><td>USD 25，依匯率浮動</td></tr>
+  <tr><td>會安印象大秀 Eco（7/18）</td><td>620</td><td>Klook，現場 720</td></tr>
+  <tr><td>占婆島一日遊（7/19，含午餐）</td><td>990</td><td>含接送・浮潛・午餐</td></tr>
+  <tr><td>美山聖地（7/20）</td><td>195</td><td>150,000 VND</td></tr>
+  <tr><td>VinWonders 珍珠島（7/21）</td><td>1,200</td><td>約 950,000 VND</td></tr>
+  <tr><td>五行山水山+陰府洞+電梯（7/22）</td><td>108</td><td>40k+40k+15k VND</td></tr>
+  <tr><td>巴拿山門票含纜車（7/26）</td><td>1,150</td><td>900,000 VND</td></tr>
+  <tr><td>占婆雕刻博物館（7/25）</td><td>80</td><td>60,000 VND</td></tr>
+  <tr><td>順化皇城（7/24）</td><td>260</td><td>200,000 VND</td></tr>
+  <tr><td>啟定皇陵（7/24）</td><td>195</td><td>150,000 VND</td></tr>
+  <tr><td>順化遺跡列車 HD（7/24）</td><td>230</td><td>180,000 VND</td></tr>
+  <tr><td>順化→峴港 Limo Minivan（7/24）</td><td>300</td><td>bookaway.com</td></tr>
+  <tr><td>會安餐食（5天 × NTD 400）</td><td>2,000</td><td>夜市・餐廳</td></tr>
+  <tr><td>峴港餐食（6天 × NTD 400）</td><td>2,400</td><td>含移動日</td></tr>
+</table>
+<div class="sub-bar sb-da">每位大人費用小計：約 NTD 10,428</div>
+</div>
+
+<div class="cs">
+<h3 class="h3-pu">③ 每位小孩費用（× 小孩人數）</h3>
+<table>
+  <tr><th>項目</th><th>每位小孩（NTD）</th><th>備註</th></tr>
+  <tr><td>越南電子簽證（12歲以下免費）</td><td>0</td><td>12歲以上同成人</td></tr>
+  <tr><td>會安印象大秀（7/18）</td><td>620</td><td>通常同成人票價</td></tr>
+  <tr><td>占婆島一日遊（7/19）</td><td>800</td><td>孩童約 80-90% 折扣</td></tr>
+  <tr><td>美山聖地（7/20）</td><td>195</td><td>同成人</td></tr>
+  <tr><td>VinWonders（7/21）</td><td>960</td><td>孩童約 760,000 VND</td></tr>
+  <tr><td>五行山（7/22）</td><td>108</td><td>同成人</td></tr>
+  <tr><td>巴拿山（7/26）</td><td>920</td><td>孩童約 720,000 VND</td></tr>
+  <tr><td>占婆博物館（7/25）</td><td>80</td><td>同成人</td></tr>
+  <tr><td>順化皇城（7/24）</td><td>130</td><td>孩童半價，100,000 VND</td></tr>
+  <tr><td>啟定皇陵（7/24）</td><td>100</td><td>孩童半價，75,000 VND</td></tr>
+  <tr><td>順化列車 HD（7/24）</td><td>230</td><td>同成人</td></tr>
+  <tr><td>順化→峴港 Minivan（7/24）</td><td>300</td><td>同成人</td></tr>
+  <tr><td>會安餐食（5天 × NTD 300）</td><td>1,500</td><td>孩子食量較少</td></tr>
+  <tr><td>峴港餐食（6天 × NTD 300）</td><td>1,800</td><td>孩子食量較少</td></tr>
+</table>
+<div class="sub-bar sb-pu">每位小孩費用小計：約 NTD 7,743</div>
+</div>
+
+<div class="cs">
+<h3 class="h3-dk">試算表（常見組合）</h3>
+<table>
+  <tr><th>出發組合</th><th>共用費用</th><th>大人費用</th><th>小孩費用</th><th>預估總計</th></tr>
+  <tr><td>2大1小</td><td>23,255</td><td>10,428 × 2 = 20,856</td><td>7,743 × 1 = 7,743</td><td><b>約 NTD 51,854</b></td></tr>
+  <tr><td>2大2小</td><td>23,255</td><td>10,428 × 2 = 20,856</td><td>7,743 × 2 = 15,486</td><td><b>約 NTD 59,597</b></td></tr>
+  <tr><td>1大1小</td><td>23,255</td><td>10,428 × 1 = 10,428</td><td>7,743 × 1 = 7,743</td><td><b>約 NTD 41,426</b></td></tr>
+  <tr><td>3大0小</td><td>23,255</td><td>10,428 × 3 = 31,284</td><td>—</td><td><b>約 NTD 54,539</b></td></tr>
+</table>
+<p style="font-size:.8rem;color:var(--muted);margin-top:8px;">※ 人數超過2人可能需加床（NTD 500-800/晚）。越南簽證12歲以下免辦。各景點孩童年齡區間以訂票平台為準。</p>
+</div>
+</div><!-- /cost -->
+
+<!-- RESTAURANT -->
+<div id="rest" class="pane">
+<div style="margin-bottom:20px">
+  <div class="rh rh-hoi">🌿 會安 Hội An</div>
+  <table>
+    <tr><th>餐廳</th><th>必點</th><th>價位</th><th>對應日期</th><th>備註</th></tr>
+    <tr><td>MẸT Hội An</td><td>越南料理（多元）</td><td>中等</td><td>7/18 晚</td><td>印象秀前，建議訂位</td></tr>
+    <tr><td>Morning Glory Original</td><td>白玫瑰・高樓麵・炸雲吞</td><td>中等</td><td>7/19 晚</td><td>米其林，會安三寶</td></tr>
+    <tr><td>Cơm Gà Ba Buội</td><td>薑黃雞肉飯</td><td>平價</td><td>7/20 早</td><td>在地排隊名店</td></tr>
+    <tr><td>Pho Xua</td><td>河粉・白玫瑰</td><td>平價</td><td>7/20 晚</td><td>近懷河，放水燈前</td></tr>
+    <tr><td>Mì Quảng Ông Hai</td><td>廣南麵・高樓麵</td><td>平價</td><td>7/21 晚</td><td>VinWonders 返回後</td></tr>
+    <tr><td>Bánh Mì Phượng</td><td>越式法國麵包</td><td>超平價</td><td>7/18/22</td><td>Anthony Bourdain 推薦</td></tr>
+  </table>
+</div>
+<div style="margin-bottom:20px">
+  <div class="rh rh-da">🌊 峴港 Đà Nẵng</div>
+  <table>
+    <tr><th>餐廳</th><th>必點</th><th>價位</th><th>對應日期</th><th>備註</th></tr>
+    <tr><td>Pizza 4P's</td><td>半熟蛋黃披薩</td><td>中等</td><td>7/22 晚</td><td>換口味</td></tr>
+    <tr><td>Madame Lan 蘭夫人</td><td>300+ 道越南菜</td><td>中等</td><td>7/23 晚</td><td>巴拿山後大餐</td></tr>
+    <tr><td>Bún Chả Cá 109</td><td>魚湯粉</td><td>平價</td><td>7/25 午</td><td>米其林，109 Nguyễn Chí Thanh</td></tr>
+    <tr><td>Hải Sản Bé Mặn</td><td>活海鮮現做</td><td>平價</td><td>7/25 晚</td><td>大排檔，CP 值高</td></tr>
+    <tr><td>LUK LAK</td><td>越南料理（米其林）</td><td>平價</td><td>7/26 午</td><td>要訂位</td></tr>
+    <tr><td>Cộng Cà Phê 越共咖啡</td><td>椰奶冰沙</td><td>平價</td><td>7/26 下午</td><td>軍事主題網紅</td></tr>
+    <tr><td>漢市場熟食區</td><td>魚湯粉・米紙捲</td><td>超平價</td><td>7/27</td><td>在地早餐</td></tr>
+  </table>
+</div>
+<div>
+  <div class="rh rh-hue">🏰 順化 Huế（7/24 當日）</div>
+  <table>
+    <tr><th>食物</th><th>說明</th><th>建議時段</th></tr>
+    <tr><td>Bún Bò Huế 順化牛肉粉</td><td>香茅蝦醬湯，牛腱＋豬腳，辛辣濃郁</td><td>午餐</td></tr>
+    <tr><td>Bánh Bèo 米糕碟</td><td>米粉蒸碟＋乾蝦，約 NTD 20-40</td><td>點心</td></tr>
+  </table>
+</div>
+</div><!-- /rest -->
+
+<!-- TABOO -->
+<div id="taboo" class="pane">
+<p style="margin-bottom:16px;color:var(--muted);font-size:.88rem;">越南文化禁忌相對較少，以下幾點請特別注意，尤其進入宗教場所時。</p>
+<div class="tb-grid">
+  <div class="tb"><div class="tb-h" style="color:var(--warn);">⛩ 皇城・寺廟禮儀</div><div class="tb-b">順化皇城、各寺廟禁止穿無袖、短褲、短裙入內。入場前脫鞋。禁止攀爬或觸摸神像。</div></div>
+  <div class="tb"><div class="tb-h" style="color:var(--hoi);">🌙 會安古城宗教場所</div><div class="tb-b">進入廟宇前脫鞋。禁止在神明前嬉鬧喧嘩。福建會館等需保持安靜，尊重宗教氣氛。</div></div>
+  <div class="tb"><div class="tb-h" style="color:var(--da);">📸 拍照禮儀</div><div class="tb-b">拍攝越南人前請先徵得同意，尤其老人及兒童。部分宗教場所禁止拍照，請遵守現場告示。</div></div>
+  <div class="tb"><div class="tb-h" style="color:var(--tr);">💰 議價與金錢</div><div class="tb-b">市場議價屬常規，請保持友善態度。避免在廟宇外被引導購買「特別儀式」。</div></div>
+  <div class="tb"><div class="tb-h" style="color:var(--hoi);">🤝 基本禮儀</div><div class="tb-b">不在公共場合大聲爭論。對長者保持尊重。遞物盡量雙手。避免對越南戰爭歷史做出負面評論。</div></div>
+  <div class="tb"><div class="tb-h" style="color:var(--warn);">⚠ 海灘安全</div><div class="tb-b">美溪沙灘偶有暗流，帶孩子下水請注意旗幟警示（紅旗禁止游泳）。占婆島浮潛請遵守教練指示。</div></div>
+</div>
+</div><!-- /taboo -->
+
+<!-- SOURCES -->
+<div id="src" class="pane">
+<p style="margin-bottom:16px;color:var(--muted);font-size:.88rem;">交通費用以 1 年內資料為原則，景點資訊以 5 年內為原則。所有連結點擊可直接前往原始資料。</p>
+
+<div class="cs"><h3 class="h3-da">交通資料（1 年內）</h3>
+<ul class="src-list">
+  <li><span class="sb2">2025/09</span><div><b>機場→會安 Grab 約 NTD 560-650</b><br><a href="https://www.ptt.cc/bbs/Vietnam/index.html" target="_blank">🔗 PTT Vietnam 版用戶實測回報</a></div></li>
+  <li><span class="sb2">2025/06</span><div><b>峴港市區 Grab 計費方式</b><br><a href="https://tw.trip.com/guide/danang/" target="_blank">🔗 Trip.com 峴港機場交通攻略</a></div></li>
+  <li><span class="sb2">2025/06</span><div><b>巴拿山共乘接駁 NTD 210</b><br><a href="https://debbiechien.com" target="_blank">🔗 debbiechien.com 巴拿山攻略</a></div></li>
+  <li><span class="sb2">2025/05</span><div><b>會安各景點 Grab 費用</b><br><a href="https://vocus.cc" target="_blank">🔗 vocus.cc 峴港會安自由行攻略</a></div></li>
+  <li><span class="sb2">持續更新</span><div><b>VinWonders 免費接駁時刻表</b><br><a href="https://vinwonders.com/vinwonders-nam-hoi-an" target="_blank">🔗 VinWonders 官方網站</a></div></li>
+  <li><span class="sb2">持續更新</span><div><b>峴港市區 Grab 費用</b><br><a href="https://danang.com.tw" target="_blank">🔗 danang.com.tw Grab 介紹頁</a></div></li>
+</ul>
+</div>
+
+<div class="cs"><h3 class="h3-hoi" style="border-color:var(--hoi);color:var(--hoi);">景點票價（5 年內）</h3>
+<ul class="src-list">
+  <li><span class="sb2">2025/11</span><div><b>巴拿山 900k VND</b><br><a href="https://www.kkday.com/zh-tw/product/26212" target="_blank">🔗 KKday 巴拿山官方票價頁</a></div></li>
+  <li><span class="sb2">2025/11</span><div><b>占婆博物館 60k VND</b><br><a href="https://www.funliday.com" target="_blank">🔗 Funliday 2026 峴港景點</a></div></li>
+  <li><span class="sb2">2026/01</span><div><b>順化皇城 200k VND</b><br><a href="https://bringyou.to/hue" target="_blank">🔗 BringYou 順化攻略</a></div></li>
+  <li><span class="sb2">2025</span><div><b>五行山・美山・印象秀票價</b><br><a href="https://tw.trip.com" target="_blank">🔗 Trip.com 景點資訊</a></div></li>
+</ul>
+</div>
+
+<div class="cs"><h3 class="h3-dk">訂票平台</h3>
+<ul class="src-list">
+  <li><span class="sb2">官方</span><div><a href="https://evisa.gov.vn/" target="_blank">🔗 越南官方 eVisa 申請 evisa.gov.vn</a></div></li>
+  <li><span class="sb2">訂票</span><div><a href="https://www.klook.com/zh-TW/" target="_blank">🔗 Klook 台灣官網</a></div></li>
+  <li><span class="sb2">訂票</span><div><a href="https://www.kkday.com/zh-tw/" target="_blank">🔗 KKday 台灣官網</a></div></li>
+  <li><span class="sb2">火車</span><div><a href="https://www.baolau.com/en/" target="_blank">🔗 Baolau 越南火車訂票</a></div></li>
+  <li><span class="sb2">小巴</span><div><a href="https://www.bookaway.com/" target="_blank">🔗 bookaway 順化→峴港 Minivan</a></div></li>
+</ul>
+</div>
+
+<p style="font-size:.8rem;color:var(--muted);">文件整理日期：2026 年 4 月｜越南物價年有調幅，出發前請再次確認最新費用。</p>
+</div><!-- /src -->
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
