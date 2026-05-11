@@ -558,9 +558,18 @@
       <div class="tool-card">
         <form id="expenseForm">
           <div class="form-row">
-            <label>日期
-              <input type="date" id="expenseDate" required />
+            <label>花費歸屬
+              <select id="expenseScope">
+                <option value="day">每日花費</option>
+                <option value="trip">整趟旅程 / 旅前共同費用</option>
+              </select>
             </label>
+            <label>日期
+              <input type="date" id="expenseDate" />
+            </label>
+          </div>
+          <p class="status" id="expenseScopeHint">每日花費會列到選取日期；機票、簽證、保險、住宿訂金可改選整趟旅程。</p>
+          <div class="form-row">
             <label>幣別
               <select id="expenseCurrency">
                 <option value="VND">VND 越南盾</option>
@@ -1051,10 +1060,27 @@
       return fullDateForDay(selectedDay());
     }
 
+    function expenseDisplayDate(item) {
+      return item.scope === "trip" || !item.date ? "整趟旅程" : item.date;
+    }
+
+    function syncExpenseScope() {
+      const isTripExpense = $("#expenseScope").value === "trip";
+      $("#expenseDate").disabled = isTripExpense;
+      $("#expenseDate").required = !isTripExpense;
+      if (isTripExpense) {
+        $("#expenseDate").value = "";
+        $("#expenseScopeHint").textContent = "整趟旅程費用適合機票、簽證、保險、住宿訂金等不屬於單一天的支出。";
+      } else {
+        $("#expenseDate").value ||= selectedDateValue();
+        $("#expenseScopeHint").textContent = "每日花費會列到選取日期；機票、簽證、保險、住宿訂金可改選整趟旅程。";
+      }
+    }
+
     function setSelectedDay(index) {
       selectedDayIndex = Math.max(0, Math.min(days.length - 1, Number(index)));
       localStorage.setItem("vietnamSelectedDay", String(selectedDayIndex));
-      $("#expenseDate").value = selectedDateValue();
+      if ($("#expenseScope").value !== "trip") $("#expenseDate").value = selectedDateValue();
       $("#journalDate").value = selectedDateValue();
       renderDayHub();
       renderItinerary();
@@ -1213,9 +1239,10 @@
       };
     }
 
-    async function createExpenseFromDetected({ title, amount, currency, category, note }) {
+    async function createExpenseFromDetected({ title, amount, currency, category, note, scope = "trip", date = "" }) {
       const item = {
-        date: selectedDateValue(),
+        scope,
+        date: scope === "trip" ? "" : (date || selectedDateValue()),
         currency,
         title,
         amount: Number(amount),
@@ -1231,7 +1258,11 @@
     }
 
     function renderExpenses() {
-      const visibleExpenses = [...state.expenses].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+      const visibleExpenses = [...state.expenses].sort((a, b) => {
+        if ((a.scope === "trip" || !a.date) && b.date) return -1;
+        if ((b.scope === "trip" || !b.date) && a.date) return 1;
+        return String(b.date || "").localeCompare(String(a.date || ""));
+      });
       const total = visibleExpenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
       $("#expenseTotal").textContent = `NTD ${Math.round(total).toLocaleString("zh-TW")}`;
       $("#expenseList").innerHTML = visibleExpenses.length ? visibleExpenses.map((item) => {
@@ -1239,7 +1270,7 @@
         return `
         <div class="record">
           <strong><span>${item.title}</span><span>${Number(item.amount).toLocaleString("zh-TW")} ${item.currency}</span></strong>
-          <small>${item.date} · ${item.category} · 約 NTD ${Math.round(toNtd(item.amount, item.currency)).toLocaleString("zh-TW")}</small>
+          <small>${expenseDisplayDate(item)} · ${item.category} · 約 NTD ${Math.round(toNtd(item.amount, item.currency)).toLocaleString("zh-TW")}</small>
           <button class="btn" type="button" data-remove-expense="${index}">刪除</button>
         </div>
       `;
@@ -1603,8 +1634,10 @@
     $("#expenseForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
+      const scope = $("#expenseScope").value;
       const item = {
-        date: $("#expenseDate").value,
+        scope,
+        date: scope === "trip" ? "" : $("#expenseDate").value,
         currency: $("#expenseCurrency").value,
         title: $("#expenseTitle").value.trim(),
         amount: Number($("#expenseAmount").value),
@@ -1615,11 +1648,15 @@
       item.id = await saveCloudRecord("expenses", item);
       state.expenses.unshift(item);
       form.reset();
+      $("#expenseScope").value = "day";
       $("#expenseDate").value = selectedDateValue();
+      syncExpenseScope();
       saveLocal();
       renderExpenses();
       renderDayHub();
     });
+
+    $("#expenseScope").addEventListener("change", syncExpenseScope);
 
     $("#detectExpenseBtn").addEventListener("click", () => {
       const fileName = $("#expenseReceipt").files?.[0]?.name || "";
@@ -1694,7 +1731,8 @@
           amount: expenseAmount,
           currency: expenseCurrency,
           category: expenseCategory,
-          note: `由文件票券自動建立：${item.fileName}`
+          note: `由文件票券自動建立：${item.fileName}`,
+          scope: "trip"
         });
       }
       form.reset();
@@ -1825,6 +1863,7 @@
 
     applyTripConfig();
     setSelectedDay(selectedDayIndex);
+    syncExpenseScope();
     renderStayDateOptions();
     renderPhotoPreview();
     renderOfflineList();
