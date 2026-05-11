@@ -97,7 +97,7 @@
       top: 0;
       z-index: 20;
       display: grid;
-      grid-template-columns: repeat(5, minmax(74px, 1fr));
+      grid-template-columns: repeat(4, minmax(74px, 1fr));
       overflow-x: auto;
       background: rgba(255, 253, 250, .94);
       border-bottom: 1px solid var(--line);
@@ -482,7 +482,7 @@
     .modal-body .actions { margin-top: 14px; }
 
     @media (max-width: 780px) {
-      .tabs { grid-template-columns: repeat(5, 88px); }
+      .tabs { grid-template-columns: repeat(4, 88px); }
       main { padding-inline: 10px; }
       .day-home-grid { grid-template-columns: 1fr 1fr; }
       .form-row { grid-template-columns: 1fr; }
@@ -501,7 +501,10 @@
   <header class="hero">
     <div class="topbar">
       <div class="brand">Vietnam 2026</div>
-      <button class="auth" id="loginBtn" type="button">使用 Google 登入</button>
+      <div class="actions" style="margin-top:0">
+        <button class="auth" id="loginBtn" type="button">使用 Google 登入</button>
+        <button class="auth" id="settingsBtn" type="button">設定</button>
+      </div>
     </div>
     <div>
       <h1>峴港・會安<br />手機旅行手冊</h1>
@@ -520,7 +523,6 @@
     <button class="tab" type="button" data-panel="expenses">花費</button>
     <button class="tab" type="button" data-panel="journal">心得</button>
     <button class="tab" type="button" data-panel="other">其他</button>
-    <button class="tab" type="button" data-panel="setup">設定</button>
   </nav>
 
   <main>
@@ -792,32 +794,6 @@
       </div>
     </section>
 
-    <section class="panel" id="setup">
-      <div class="section-head">
-        <h2>Google 登入與同步設定</h2>
-        <span>目前已預留 Firebase 串接點。</span>
-      </div>
-      <div class="tool-card">
-        <p class="install-note">要讓 Google 帳號登入、花費、心得和照片跨手機同步，需要建立 Firebase 專案，啟用 Authentication 的 Google provider、Firestore 和 Storage，然後把 Firebase 設定填進本檔案的 <b>firebaseConfig</b>。</p>
-        <h3>目前資料模式</h3>
-        <p id="dataMode" class="status">讀取中...</p>
-        <h3>旅伴共用編輯</h3>
-        <p class="status">輸入旅伴的 Google 帳號 email。Firebase 設定完成後，清單內的人登入即可一起編輯同一份旅行資料。</p>
-        <form id="memberForm">
-          <label>旅伴 Google email
-            <input id="memberEmail" type="email" placeholder="friend@gmail.com" />
-          </label>
-          <button class="btn primary" type="submit">加入旅伴</button>
-        </form>
-        <div class="list" id="memberList"></div>
-        <h3>Firebase 權限規則提醒</h3>
-        <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。Storage 照同樣概念限制 <b>trips/vietnam-2026-da-nang</b> 路徑。</p>
-        <div class="actions">
-          <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
-          <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
-        </div>
-      </div>
-    </section>
   </main>
 
   <dialog id="placeDialog">
@@ -827,6 +803,31 @@
       <div class="actions">
         <a class="map-link primary" id="placeMap" href="#" target="_blank" rel="noreferrer">開 Google Maps</a>
         <button class="btn" type="button" id="closePlaceDialog">關閉</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <div class="modal-body">
+      <h2>Google 登入與同步設定</h2>
+      <p class="install-note">要讓 Google 帳號登入、花費、心得和照片跨手機同步，需要建立 Firebase 專案，啟用 Authentication 的 Google provider、Firestore 和 Storage，然後把 Firebase 設定填進本檔案的 <b>firebaseConfig</b>。</p>
+      <h3>目前資料模式</h3>
+      <p id="dataMode" class="status">讀取中...</p>
+      <h3>旅伴共用編輯</h3>
+      <p class="status">輸入旅伴的 Google 帳號 email。Firebase 設定完成後，清單內的人登入即可一起編輯同一份旅行資料。</p>
+      <form id="memberForm">
+        <label>旅伴 Google email
+          <input id="memberEmail" type="email" placeholder="friend@gmail.com" />
+        </label>
+        <button class="btn primary" type="submit">加入旅伴</button>
+      </form>
+      <div class="list" id="memberList"></div>
+      <h3>Firebase 權限規則提醒</h3>
+      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。Storage 照同樣概念限制 <b>trips/vietnam-2026-da-nang</b> 路徑。</p>
+      <div class="actions">
+        <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
+        <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
+        <button class="btn" type="button" id="closeSettingsDialog">關閉</button>
       </div>
     </div>
   </dialog>
@@ -1561,6 +1562,8 @@
     });
 
     $("#closePlaceDialog").addEventListener("click", () => $("#placeDialog").close());
+    $("#settingsBtn").addEventListener("click", () => $("#settingsDialog").showModal());
+    $("#closeSettingsDialog").addEventListener("click", () => $("#settingsDialog").close());
 
     $("#expenseForm").addEventListener("submit", async (event) => {
       event.preventDefault();
