@@ -169,32 +169,6 @@
       margin: 3px 0 14px;
       letter-spacing: .06em;
     }
-    .day-home-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .home-tile {
-      min-height: 132px;
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: rgba(255, 253, 250, .86);
-      box-shadow: var(--shadow);
-      padding: 16px;
-      text-align: left;
-      cursor: pointer;
-      display: grid;
-      align-content: center;
-      gap: 5px;
-    }
-    .home-tile strong { font-size: 1.18rem; }
-    .home-tile span { color: var(--muted); font-size: .9rem; }
-    .home-tile.wide {
-      grid-column: 1 / -1;
-      min-height: 92px;
-      background: #f4dfad;
-    }
-
     .day-card, .tool-card, .info-group {
       background: var(--paper);
       border: 1px solid var(--line);
@@ -498,7 +472,6 @@
     @media (max-width: 780px) {
       .tabs { grid-template-columns: repeat(4, 88px); }
       main { padding-inline: 10px; }
-      .day-home-grid { grid-template-columns: 1fr 1fr; }
       .form-row { grid-template-columns: 1fr; }
       .chart-wrap { grid-template-columns: 1fr; justify-items: center; }
       .legend { width: 100%; }
@@ -543,7 +516,6 @@
     <section class="day-hub" aria-label="每日主控台">
       <div class="date-strip" id="dateStrip"></div>
       <div class="day-progress" id="dayProgress"></div>
-      <div class="day-home-grid" id="dayHomeGrid"></div>
     </section>
 
     <section class="panel active" id="plan">
@@ -1089,12 +1061,6 @@
     }
 
     function renderDayHub() {
-      const day = selectedDay();
-      const selectedDate = selectedDateValue();
-      const dailyExpenses = state.expenses.filter((item) => item.date === selectedDate);
-      const dailyExpenseTotal = dailyExpenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
-      const tripExpenseTotal = state.expenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
-      const dailyJournals = state.journals.filter((item) => item.date === selectedDate);
       $("#dateStrip").innerHTML = days.map((item, index) => {
         const [month, date] = item.date.split("/");
         return `
@@ -1106,33 +1072,6 @@
         `;
       }).join("");
       $("#dayProgress").textContent = `Day ${selectedDayIndex + 1} / ${days.length}`;
-      $("#dayHomeGrid").innerHTML = `
-        <button class="home-tile" type="button" data-open-panel="plan">
-          <span>Plans</span>
-          <strong>每日行程</strong>
-          <span>${day.title}</span>
-        </button>
-        <button class="home-tile" type="button" data-open-panel="journal">
-          <span>Journal</span>
-          <strong>心得照片</strong>
-          <span>${dailyJournals.length ? `${dailyJournals.length} 則紀錄` : "寫下當日心得"}</span>
-        </button>
-        <button class="home-tile" type="button" data-open-panel="expenses">
-          <span>Wallet</span>
-          <strong>花費總覽</strong>
-          <span>累積 NTD ${Math.round(tripExpenseTotal).toLocaleString("zh-TW")} · 當日 NTD ${Math.round(dailyExpenseTotal).toLocaleString("zh-TW")}</span>
-        </button>
-        <button class="home-tile" type="button" data-open-panel="other">
-          <span>Files</span>
-          <strong>文件票券</strong>
-          <span>訂房、QR code、離線地圖</span>
-        </button>
-        <button class="home-tile wide" type="button" data-open-panel="other">
-          <span>Travel Tips</span>
-          <strong>旅遊須知</strong>
-          <span>預訂、餐廳、文化禁忌與資料來源</span>
-        </button>
-      `;
     }
 
     function renderItinerary() {
@@ -1547,7 +1486,6 @@
     document.addEventListener("click", (event) => {
       const clicked = event.target;
       const selectDay = clicked.closest("[data-select-day]")?.dataset.selectDay;
-      const openPanel = clicked.closest("[data-open-panel]")?.dataset.openPanel;
       const hotelDate = clicked.closest("[data-edit-hotel]")?.dataset.editHotel;
       const placeTarget = clicked.closest("[data-place]");
       const placeQuery = placeTarget?.dataset.place;
@@ -1560,11 +1498,6 @@
         setSelectedDay(selectDay);
         const activePanel = $(".panel.active");
         if (activePanel) activePanel.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-
-      if (openPanel) {
-        activatePanel(openPanel);
         return;
       }
 
