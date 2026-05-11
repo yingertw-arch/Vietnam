@@ -116,7 +116,7 @@
     .tab.active { color: var(--hoi); border-bottom-color: var(--hoi); }
 
     main { padding: 18px 14px 96px; max-width: 1120px; margin: 0 auto; }
-    .panel { display: none; }
+    .panel { display: none; scroll-margin-top: 68px; }
     .panel.active { display: block; }
     .section-head {
       margin: 26px 0 12px;
@@ -352,6 +352,20 @@
     }
     .record strong { display: flex; justify-content: space-between; gap: 10px; }
     .record small { color: var(--muted); }
+    .day-record-group {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .day-record-group:last-child { border-bottom: 0; }
+    .day-record-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--ink);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .day-record-head span:last-child { color: var(--muted); font-size: .86rem; font-weight: 800; }
     .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
     .photos img {
       width: 100%;
@@ -538,8 +552,8 @@
 
     <section class="panel" id="expenses">
       <div class="section-head">
-        <h2>現場花費登入</h2>
-        <span>未設定 Firebase 前會存在這支手機。</span>
+        <h2>花費總覽與登入</h2>
+        <span>顯示整趟旅程目前累積支出；新增時可選日期。</span>
       </div>
       <div class="tool-card">
         <form id="expenseForm">
@@ -582,7 +596,7 @@
           <button class="btn" id="detectExpenseBtn" type="button">從收據文字偵測金額</button>
           <button class="btn primary" type="submit">新增花費</button>
         </form>
-        <div class="total"><span>估算台幣合計</span><span id="expenseTotal">NTD 0</span></div>
+        <div class="total"><span>目前累積台幣合計</span><span id="expenseTotal">NTD 0</span></div>
         <div class="chart-wrap">
           <canvas id="expenseChart" width="180" height="180" aria-label="費用分類圓餅圖"></canvas>
           <div class="legend" id="expenseLegend"></div>
@@ -594,7 +608,7 @@
     <section class="panel" id="journal">
       <div class="section-head">
         <h2>旅遊心得與照片</h2>
-        <span>支援手機鍵盤語音，Chrome 可用網頁語音辨識。</span>
+        <span>依照每天列出心得；新增時預設為目前選取日期。</span>
       </div>
       <div class="tool-card">
         <form id="journalForm">
@@ -1053,6 +1067,7 @@
       const selectedDate = selectedDateValue();
       const dailyExpenses = state.expenses.filter((item) => item.date === selectedDate);
       const dailyExpenseTotal = dailyExpenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
+      const tripExpenseTotal = state.expenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
       const dailyJournals = state.journals.filter((item) => item.date === selectedDate);
       $("#dateStrip").innerHTML = days.map((item, index) => {
         const [month, date] = item.date.split("/");
@@ -1078,8 +1093,8 @@
         </button>
         <button class="home-tile" type="button" data-open-panel="expenses">
           <span>Wallet</span>
-          <strong>記帳分帳</strong>
-          <span>當日約 NTD ${Math.round(dailyExpenseTotal).toLocaleString("zh-TW")}</span>
+          <strong>花費總覽</strong>
+          <span>累積 NTD ${Math.round(tripExpenseTotal).toLocaleString("zh-TW")} · 當日 NTD ${Math.round(dailyExpenseTotal).toLocaleString("zh-TW")}</span>
         </button>
         <button class="home-tile" type="button" data-open-panel="other">
           <span>Files</span>
@@ -1216,8 +1231,7 @@
     }
 
     function renderExpenses() {
-      const selectedDate = selectedDateValue();
-      const visibleExpenses = state.expenses.filter((item) => item.date === selectedDate);
+      const visibleExpenses = [...state.expenses].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
       const total = visibleExpenses.reduce((sum, item) => sum + toNtd(item.amount, item.currency), 0);
       $("#expenseTotal").textContent = `NTD ${Math.round(total).toLocaleString("zh-TW")}`;
       $("#expenseList").innerHTML = visibleExpenses.length ? visibleExpenses.map((item) => {
@@ -1229,7 +1243,7 @@
           <button class="btn" type="button" data-remove-expense="${index}">刪除</button>
         </div>
       `;
-      }).join("") : `<p class="status">這一天還沒有花費紀錄。</p>`;
+      }).join("") : `<p class="status">目前還沒有花費紀錄。旅行開始前這裡可以先空著；到現場再逐筆新增即可。</p>`;
       renderExpenseChart(visibleExpenses);
     }
 
@@ -1300,19 +1314,30 @@
     }
 
     function renderJournals() {
-      const selectedDate = selectedDateValue();
-      const visibleJournals = state.journals.filter((item) => item.date === selectedDate);
-      $("#journalList").innerHTML = visibleJournals.length ? visibleJournals.map((item) => {
-        const index = state.journals.indexOf(item);
+      $("#journalList").innerHTML = days.map((day, dayIndex) => {
+        const dateValue = fullDateForDay(day);
+        const dayJournals = state.journals.filter((item) => item.date === dateValue);
+        const records = dayJournals.length ? dayJournals.map((item) => {
+          const index = state.journals.indexOf(item);
+          return `
+            <article class="record">
+              <strong><span>${item.place || "旅行紀錄"}</span><span>${item.date}</span></strong>
+              <small>${item.text}</small>
+              ${item.photos?.length ? `<div class="photos">${item.photos.map((src) => `<img src="${src}" alt="旅遊照片" loading="lazy" />`).join("")}</div>` : ""}
+              <button class="btn" type="button" data-remove-journal="${index}">刪除</button>
+            </article>
+          `;
+        }).join("") : `<p class="status">這一天還沒有心得。</p>`;
         return `
-        <article class="record">
-          <strong><span>${item.place || "旅行紀錄"}</span><span>${item.date}</span></strong>
-          <small>${item.text}</small>
-          ${item.photos?.length ? `<div class="photos">${item.photos.map((src) => `<img src="${src}" alt="旅遊照片" loading="lazy" />`).join("")}</div>` : ""}
-          <button class="btn" type="button" data-remove-journal="${index}">刪除</button>
-        </article>
+          <section class="day-record-group">
+            <div class="day-record-head">
+              <span>D${dayIndex + 1} · ${day.date} 週${day.weekday}</span>
+              <span>${day.title}</span>
+            </div>
+            ${records}
+          </section>
       `;
-      }).join("") : `<p class="status">這一天還沒有心得。回飯店花 2 分鐘記一段，回來會很值得。</p>`;
+      }).join("");
     }
 
     function renderPhotoPreview() {
@@ -1469,13 +1494,22 @@
       }
     }
 
+    function activatePanel(panelName, shouldScroll = true) {
+      const panel = $(`#${panelName}`);
+      const tab = document.querySelector(`.tab[data-panel="${panelName}"]`);
+      if (!panel || !tab) return;
+      $$(".tab").forEach((item) => item.classList.remove("active"));
+      $$(".panel").forEach((item) => item.classList.remove("active"));
+      tab.classList.add("active");
+      panel.classList.add("active");
+      if (shouldScroll) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     $$(".tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        $$(".tab").forEach((item) => item.classList.remove("active"));
-        $$(".panel").forEach((item) => item.classList.remove("active"));
-        tab.classList.add("active");
-        $(`#${tab.dataset.panel}`).classList.add("active");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      tab.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        activatePanel(tab.dataset.panel);
       });
     });
 
@@ -1493,12 +1527,13 @@
 
       if (selectDay !== undefined) {
         setSelectedDay(selectDay);
+        const activePanel = $(".panel.active");
+        if (activePanel) activePanel.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
 
       if (openPanel) {
-        const tabButton = document.querySelector(`.tab[data-panel="${openPanel}"]`);
-        if (tabButton) tabButton.click();
+        activatePanel(openPanel);
         return;
       }
 
