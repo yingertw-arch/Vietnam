@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    function isTripMember(tripId) {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/trips/$(tripId)/members/$(request.auth.token.email));
+    }
+
+    match /trips/{tripId}/{allPaths=**} {
+      allow read, write: if isTripMember(tripId);
+    }
+  }
+}
