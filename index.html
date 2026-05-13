@@ -1009,7 +1009,7 @@
     function offlineStops() {
       const seen = new Map();
       days.forEach((day) => {
-        day.stops.forEach(([time, name, note, query]) => {
+        day.stops.map((stop) => stopWithCurrentHotel(day, stop)).forEach(([time, name, note, query]) => {
           if (!seen.has(query)) {
             seen.set(query, { date: day.date, time, name, note, query });
           }
@@ -1030,6 +1030,14 @@
 
     function selectedDateValue() {
       return fullDateForDay(selectedDay());
+    }
+
+    function stopWithCurrentHotel(day, stop) {
+      const hotel = state.hotels[day.date] || day.hotel;
+      const originalHotel = day.hotel || "";
+      const [time, name, note, query] = stop;
+      const isHotelStop = originalHotel && (name === originalHotel || query === originalHotel);
+      return isHotelStop ? [time, hotel, note, hotel] : stop;
     }
 
     function expenseDisplayDate(item) {
@@ -1103,7 +1111,9 @@
           </div>
           <div class="day-body">
             <ul class="timeline">
-              ${day.stops.map(([time, name, note, query]) => `
+              ${day.stops.map((stop) => {
+                const [time, name, note, query] = stopWithCurrentHotel(day, stop);
+                return `
                 <li>
                   <span class="time">${time}</span>
                   <span>
@@ -1115,7 +1125,8 @@
                     </span>
                   </span>
                 </li>
-              `).join("")}
+              `;
+              }).join("")}
             </ul>
           </div>
         `;
@@ -1509,6 +1520,7 @@
           state.hotels[hotelDate] = next.trim();
           saveLocal();
           renderItinerary();
+          renderOfflineList();
         }
       }
 
@@ -1653,6 +1665,7 @@
       if ($("#docApplyHotel").checked && item.category === "住宿") {
         applyHotelFromDoc(item.title, item.stayStart, item.stayEnd);
         renderItinerary();
+        renderOfflineList();
       }
       const detected = detectExpenseFromText(`${item.title} ${item.fileName}`);
       const expenseAmount = item.expenseAmount || detected?.amount || 0;
