@@ -1036,7 +1036,18 @@
       const hotel = state.hotels[day.date] || day.hotel;
       const originalHotel = day.hotel || "";
       const [time, name, note, query] = stop;
-      const isHotelStop = originalHotel && (name === originalHotel || query === originalHotel);
+      const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, "");
+      const original = normalize(originalHotel);
+      const stopName = normalize(name);
+      const stopQuery = normalize(query);
+      const isHotelStop = original && (
+        stopName === original ||
+        stopQuery === original ||
+        stopName.includes(original) ||
+        stopQuery.includes(original) ||
+        original.includes(stopName) ||
+        original.includes(stopQuery)
+      );
       return isHotelStop ? [time, hotel, note, hotel] : stop;
     }
 
