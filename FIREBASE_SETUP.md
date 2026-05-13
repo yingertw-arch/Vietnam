@@ -14,6 +14,27 @@ The handbook runs locally without Firebase. Enable Firebase when you want Google
 8. Optional: enable Storage only if you need cloud sync for PDFs, receipts, and photos.
 9. Optional: publish `storage.rules` to Storage Rules after Storage is enabled.
 
+## GitHub Pages
+
+The repository keeps `firebase-config.js` blank so Firebase keys are not committed to Git history. The GitHub Pages workflow creates `firebase-config.js` during deployment from repository secrets.
+
+Add these secrets in GitHub repository Settings > Secrets and variables > Actions:
+
+- `FIREBASE_API_KEY`
+- `FIREBASE_AUTH_DOMAIN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_STORAGE_BUCKET`
+- `FIREBASE_MESSAGING_SENDER_ID`
+- `FIREBASE_APP_ID`
+- `FIREBASE_MEASUREMENT_ID`
+
+Then set GitHub Pages source to GitHub Actions. The deployed site will receive Firebase config, while the source branch stays free of API keys.
+
+In Firebase Authentication > Settings > Authorized domains, add:
+
+- `127.0.0.1`
+- `yingertw-arch.github.io`
+
 ## First Owner
 
 The first signed-in user creates the trip member document for themselves. Add travel companions in the site under `設定 > 旅伴共用編輯`.
