@@ -1478,6 +1478,7 @@
       renderJournals();
       renderMembers();
       renderDocs();
+      updateEditLock();
     }
 
     async function saveCloudRecord(type, payload) {
@@ -1538,6 +1539,33 @@
       if (shouldScroll) panel.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
+    function requireEditor() {
+      if (currentUser) return true;
+      const message = hasFirebaseConfig
+        ? "請先使用 Google 登入，才能編輯共用旅程資料。"
+        : "目前尚未完成 Firebase 設定，暫時只能瀏覽行程，不能新增或修改共用資料。";
+      $("#dataMode").textContent = message;
+      alert(message);
+      return false;
+    }
+
+    function updateEditLock() {
+      const unlocked = Boolean(currentUser);
+      const selectors = [
+        "#hotelForm input", "#hotelForm select", "#hotelForm button[type='submit']",
+        "#expenseForm input", "#expenseForm select", "#expenseForm button",
+        "#journalForm input", "#journalForm textarea", "#journalForm button",
+        "#docForm input", "#docForm select", "#docForm button",
+        "#memberForm input", "#memberForm button",
+        "[data-edit-hotel]", "[data-remove-expense]", "[data-remove-journal]",
+        "[data-remove-member]", "[data-remove-doc]", "[data-offline-map]", "#clearLocalBtn"
+      ];
+      document.querySelectorAll(selectors.join(",")).forEach((element) => {
+        element.disabled = !unlocked;
+        element.title = unlocked ? "" : "請先使用 Google 登入，才能編輯共用旅程資料。";
+      });
+    }
+
     $$(".tab").forEach((tab) => {
       tab.addEventListener("click", (event) => {
         event.preventDefault();
@@ -1565,6 +1593,7 @@
       }
 
       if (hotelDate) {
+        if (!requireEditor()) return;
         openHotelDialog(hotelDate);
       }
 
@@ -1578,38 +1607,50 @@
       }
 
       if (expenseIndex !== undefined) {
+        if (!requireEditor()) return;
         const [removed] = state.expenses.splice(Number(expenseIndex), 1);
         deleteCloudRecord("expenses", removed?.id);
         saveLocal();
         renderExpenses();
+        updateEditLock();
       }
 
       if (journalIndex !== undefined) {
+        if (!requireEditor()) return;
         const [removed] = state.journals.splice(Number(journalIndex), 1);
         deleteCloudRecord("journals", removed?.id);
         saveLocal();
         renderJournals();
+        updateEditLock();
       }
 
       if (memberIndex !== undefined) {
+        if (!requireEditor()) return;
         const [removedEmail] = state.members.splice(Number(memberIndex), 1);
         syncMembersToCloud.removedEmail = removedEmail;
         saveLocal();
         renderMembers();
         syncMembersToCloud();
+        updateEditLock();
       }
 
       if (docIndex !== undefined) {
+        if (!requireEditor()) return;
         const [removed] = state.docs.splice(Number(docIndex), 1);
         deleteCloudRecord("docs", removed?.id);
         saveLocal();
         renderDocs();
+        updateEditLock();
       }
     });
 
     document.addEventListener("change", (event) => {
       const offlineQuery = event.target.dataset.offlineMap;
       if (!offlineQuery) return;
+      if (!requireEditor()) {
+        event.target.checked = !event.target.checked;
+        return;
+      }
       const query = decodeURIComponent(offlineQuery);
       state.offline[query] = event.target.checked;
       saveLocal();
@@ -1623,6 +1664,7 @@
 
     $("#hotelForm").addEventListener("submit", (event) => {
       event.preventDefault();
+      if (!requireEditor()) return;
       const title = $("#hotelName").value.trim();
       if (!title) return;
       const applied = applyHotelFromDoc(title, $("#hotelStart").value, $("#hotelEnd").value);
@@ -1633,11 +1675,13 @@
       saveLocal();
       renderItinerary();
       renderOfflineList();
+      updateEditLock();
       $("#hotelDialog").close();
     });
 
     $("#expenseForm").addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!requireEditor()) return;
       const form = event.currentTarget;
       const scope = $("#expenseScope").value;
       const item = {
@@ -1659,6 +1703,7 @@
       saveLocal();
       renderExpenses();
       renderDayHub();
+      updateEditLock();
     });
 
     $("#expenseScope").addEventListener("change", syncExpenseScope);
@@ -1679,6 +1724,7 @@
 
     $("#memberForm").addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!requireEditor()) return;
       const email = $("#memberEmail").value.trim().toLowerCase();
       if (!email) return;
       if (!state.members.includes(email) && email !== currentUser?.email) {
@@ -1688,10 +1734,12 @@
       saveLocal();
       renderMembers();
       await syncMembersToCloud();
+      updateEditLock();
     });
 
     $("#docForm").addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!requireEditor()) return;
       const form = event.currentTarget;
       $("#docStatus").textContent = "正在加入文件...";
       const file = $("#docFile").files?.[0];
@@ -1744,11 +1792,13 @@
       form.reset();
       saveLocal();
       renderDocs();
+      updateEditLock();
       $("#docStatus").textContent = "文件已加入。";
     });
 
     $("#journalForm").addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!requireEditor()) return;
       const form = event.currentTarget;
       const photoUrls = await uploadCloudPhotos();
       const item = {
@@ -1768,9 +1818,14 @@
       renderPhotoPreview();
       renderJournals();
       renderDayHub();
+      updateEditLock();
     });
 
     $("#photoInput").addEventListener("change", async (event) => {
+      if (!requireEditor()) {
+        event.target.value = "";
+        return;
+      }
       const files = Array.from(event.target.files || []).slice(0, 6);
       state.photoFiles = files;
       state.photos = await Promise.all(files.map((file) => new Promise((resolve) => {
@@ -1782,6 +1837,7 @@
     });
 
     $("#voiceBtn").addEventListener("click", () => {
+      if (!requireEditor()) return;
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         $("#voiceStatus").textContent = "這個瀏覽器沒有開放網頁語音辨識，請改用手機鍵盤上的麥克風輸入。";
@@ -1802,6 +1858,7 @@
     });
 
     $("#clearLocalBtn").addEventListener("click", () => {
+      if (!requireEditor()) return;
       if (!confirm("確定要清除這支手機上的花費、心得、住宿修改測試資料？")) return;
       state.expenses = [];
       state.journals = [];
@@ -1819,6 +1876,7 @@
       renderOfflineList();
       renderMembers();
       renderDocs();
+      updateEditLock();
     });
 
     async function setupAuth() {
@@ -1874,6 +1932,7 @@
           ? `共用旅程模式：已登入 ${user.email || user.displayName || "Google 帳號"}，資料會同步到旅程 ${tripId}。`
           : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、照片與旅伴清單。";
         if (user) loadCloudData();
+        updateEditLock();
       });
     }
 
@@ -1885,6 +1944,7 @@
     renderOfflineList();
     renderMembers();
     renderDocs();
+    updateEditLock();
     setupAuth();
   </script>
 </body>
