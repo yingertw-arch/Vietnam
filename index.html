@@ -1848,10 +1848,20 @@
       const provider = new GoogleAuthProvider();
 
       $("#loginBtn").addEventListener("click", async () => {
-        if (auth.currentUser) {
-          await signOut(auth);
-        } else {
-          await signInWithRedirect(auth, provider);
+        try {
+          if (auth.currentUser) {
+            await signOut(auth);
+          } else {
+            await signInWithRedirect(auth, provider);
+          }
+        } catch (error) {
+          console.error("Google sign-in failed", error);
+          const code = error?.code || "";
+          const message = code === "auth/unauthorized-domain"
+            ? "這個網址還沒有加入 Firebase Authentication 的 Authorized domains。請在 Firebase 加入 yingertw-arch.github.io；本機測試則加入 127.0.0.1。"
+            : `Google 登入失敗：${code || error?.message || "請稍後再試"}`;
+          $("#dataMode").textContent = message;
+          alert(message);
         }
       });
 
