@@ -802,6 +802,30 @@
     </div>
   </dialog>
 
+  <dialog id="hotelDialog">
+    <div class="modal-body">
+      <h2>更改住宿區間</h2>
+      <p class="install-note">選擇幾月幾號到幾月幾號住在哪裡，系統會一次更新這段日期的住宿與行程中的住宿站點。</p>
+      <form id="hotelForm">
+        <div class="form-row">
+          <label>開始日期
+            <select id="hotelStart"></select>
+          </label>
+          <label>結束日期
+            <select id="hotelEnd"></select>
+          </label>
+        </div>
+        <label>住宿名稱
+          <input id="hotelName" placeholder="例如：Hoi An Majestic Villa" required />
+        </label>
+        <div class="actions">
+          <button class="btn primary" type="submit">套用住宿</button>
+          <button class="btn" type="button" id="closeHotelDialog">取消</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <dialog id="settingsDialog">
     <div class="modal-body">
       <h2>Google 登入與同步設定</h2>
@@ -1145,12 +1169,29 @@
       });
     }
 
-    function renderStayDateOptions() {
-      const options = [`<option value="">不套用住宿</option>`]
+    function stayDateOptions(emptyLabel = "") {
+      const options = emptyLabel ? [`<option value="">${emptyLabel}</option>`] : [];
+      return options
         .concat(days.map((day) => `<option value="${day.date}">${day.date} 週${day.weekday}</option>`))
         .join("");
-      $("#docStayStart").innerHTML = options;
-      $("#docStayEnd").innerHTML = options;
+    }
+
+    function renderStayDateOptions() {
+      const docOptions = stayDateOptions("不套用住宿");
+      $("#docStayStart").innerHTML = docOptions;
+      $("#docStayEnd").innerHTML = docOptions;
+      const hotelOptions = stayDateOptions();
+      $("#hotelStart").innerHTML = hotelOptions;
+      $("#hotelEnd").innerHTML = hotelOptions;
+    }
+
+    function openHotelDialog(date) {
+      const day = days.find((item) => item.date === date) || selectedDay();
+      const current = state.hotels[day.date] || day.hotel || "";
+      $("#hotelStart").value = day.date;
+      $("#hotelEnd").value = day.date;
+      $("#hotelName").value = current;
+      $("#hotelDialog").showModal();
     }
 
     function applyHotelFromDoc(title, startDate, endDate) {
@@ -1524,15 +1565,7 @@
       }
 
       if (hotelDate) {
-        const day = days.find((item) => item.date === hotelDate);
-        const current = state.hotels[hotelDate] || day?.hotel || "";
-        const next = prompt(`${hotelDate} 的住宿點`, current);
-        if (next !== null && next.trim()) {
-          state.hotels[hotelDate] = next.trim();
-          saveLocal();
-          renderItinerary();
-          renderOfflineList();
-        }
+        openHotelDialog(hotelDate);
       }
 
       if (placeQuery) {
@@ -1584,8 +1617,24 @@
     });
 
     $("#closePlaceDialog").addEventListener("click", () => $("#placeDialog").close());
+    $("#closeHotelDialog").addEventListener("click", () => $("#hotelDialog").close());
     $("#settingsBtn").addEventListener("click", () => $("#settingsDialog").showModal());
     $("#closeSettingsDialog").addEventListener("click", () => $("#settingsDialog").close());
+
+    $("#hotelForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const title = $("#hotelName").value.trim();
+      if (!title) return;
+      const applied = applyHotelFromDoc(title, $("#hotelStart").value, $("#hotelEnd").value);
+      if (!applied) {
+        alert("請選擇住宿開始與結束日期。");
+        return;
+      }
+      saveLocal();
+      renderItinerary();
+      renderOfflineList();
+      $("#hotelDialog").close();
+    });
 
     $("#expenseForm").addEventListener("submit", async (event) => {
       event.preventDefault();
