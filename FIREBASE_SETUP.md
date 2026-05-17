@@ -16,7 +16,7 @@ The handbook runs locally without Firebase. Enable Firebase when you want Google
 
 ## GitHub Pages
 
-The repository keeps `firebase-config.js` blank so Firebase keys are not committed to Git history. The GitHub Pages workflow creates `firebase-config.js` during deployment from repository secrets.
+The repository keeps `firebase-config.js` blank so Firebase config values are not committed to Git history. Firebase Web API keys are public client identifiers, not server secrets, but they still need protected Authentication domains and Firestore/Storage rules. The GitHub Pages workflow creates `firebase-config.js` during deployment from repository secrets.
 
 Add these secrets in GitHub repository Settings > Secrets and variables > Actions:
 
@@ -34,6 +34,25 @@ In Firebase Authentication > Settings > Authorized domains, add:
 
 - `127.0.0.1`
 - `yingertw-arch.github.io`
+
+Remove any unused domains before launch.
+
+## Security Rules
+
+The current rules are scoped to this trip only:
+
+```js
+tripId: "vietnam-2026-da-nang"
+```
+
+Firestore allows only signed-in trip members to read/write trip data. The first signed-in user can initialize this one trip and becomes the owner. Storage, if enabled, accepts only signed-in trip members and only PDF/image uploads under 10 MB.
+
+Before publishing, deploy the rules:
+
+```bash
+firebase deploy --only firestore:rules
+firebase deploy --only storage
+```
 
 ## First Owner
 

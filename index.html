@@ -33,6 +33,7 @@
       font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 16px;
       line-height: 1.65;
+      overflow-x: hidden;
     }
     button, input, textarea, select { font: inherit; }
     a { color: inherit; }
@@ -53,6 +54,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      max-width: 100%;
     }
     .brand { font-weight: 900; letter-spacing: .02em; }
     .auth {
@@ -81,6 +83,7 @@
       margin: 0;
       max-width: 640px;
       color: rgba(255,255,255,.92);
+      overflow-wrap: anywhere;
     }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
     .chip {
@@ -470,6 +473,30 @@
     .modal-body .actions { margin-top: 14px; }
 
     @media (max-width: 780px) {
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: flex-start;
+        column-gap: 0;
+      }
+      .topbar .actions {
+        width: 100%;
+        max-width: 22.25rem;
+        flex: none;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .hero > div:last-child {
+        max-width: 22.25rem;
+      }
+      .topbar .auth {
+        min-width: 0;
+        justify-content: center;
+      }
+      .hero h1 {
+        font-size: clamp(2.35rem, 12vw, 4rem);
+      }
       .tabs { grid-template-columns: repeat(4, 88px); }
       main { padding-inline: 10px; }
       .form-row { grid-template-columns: 1fr; }
