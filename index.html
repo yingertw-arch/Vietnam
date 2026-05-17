@@ -1018,6 +1018,7 @@
     const hasFirebaseConfig = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
     let cloud = null;
     let currentUser = null;
+    let authReady = !hasFirebaseConfig;
     const categoryColors = {
       "交通": "#0f5a49",
       "餐飲": "#d49a2a",
@@ -1568,6 +1569,12 @@
 
     function requireEditor() {
       if (currentUser) return true;
+      if (hasFirebaseConfig && !authReady) {
+        const message = "正在確認 Google 登入狀態，請稍等幾秒後再試。";
+        $("#dataMode").textContent = message;
+        alert(message);
+        return false;
+      }
       const message = hasFirebaseConfig
         ? "請先使用 Google 登入，才能編輯共用旅程資料。"
         : "目前尚未完成 Firebase 設定，暫時只能瀏覽行程，不能新增或修改共用資料。";
@@ -1589,7 +1596,11 @@
       ];
       document.querySelectorAll(selectors.join(",")).forEach((element) => {
         element.disabled = !unlocked;
-        element.title = unlocked ? "" : "請先使用 Google 登入，才能編輯共用旅程資料。";
+        element.title = unlocked
+          ? ""
+          : authReady
+            ? "請先使用 Google 登入，才能編輯共用旅程資料。"
+            : "正在確認 Google 登入狀態。";
       });
     }
 
@@ -1919,7 +1930,7 @@
       }
 
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
-      const { getAuth, GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
+      const { getAuth, GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult, setPersistence, browserLocalPersistence } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
       const firestore = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
       const storageApi = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js");
       const app = initializeApp(firebaseConfig);
@@ -1931,6 +1942,22 @@
         storageApi
       };
       const provider = new GoogleAuthProvider();
+      await setPersistence(auth, browserLocalPersistence);
+      try {
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user) {
+          $("#dataMode").textContent = `Google 登入完成：${redirectResult.user.email || redirectResult.user.displayName || "已登入"}。正在同步資料...`;
+        }
+      } catch (error) {
+        console.error("Google redirect sign-in failed", error);
+        authReady = true;
+        const code = error?.code || "";
+        const message = code === "auth/unauthorized-domain"
+          ? "這個網址還沒有加入 Firebase Authentication 的 Authorized domains。請在 Firebase 加入 yingertw-arch.github.io。"
+          : `Google 登入轉跳失敗：${code || error?.message || "請稍後再試"}`;
+        $("#dataMode").textContent = message;
+        alert(message);
+      }
 
       $("#loginBtn").addEventListener("click", async () => {
         try {
@@ -1951,6 +1978,7 @@
       });
 
       onAuthStateChanged(auth, (user) => {
+        authReady = true;
         currentUser = user;
         $("#loginBtn").innerHTML = user
           ? `<img src="${user.photoURL}" alt="" />${user.displayName || "已登入"}`
