@@ -1930,7 +1930,7 @@
       }
 
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
-      const { getAuth, GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult, setPersistence, browserLocalPersistence } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
+      const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult, setPersistence, browserLocalPersistence } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
       const firestore = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
       const storageApi = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js");
       const app = initializeApp(firebaseConfig);
@@ -1964,7 +1964,22 @@
           if (auth.currentUser) {
             await signOut(auth);
           } else {
-            await signInWithRedirect(auth, provider);
+            $("#dataMode").textContent = "正在開啟 Google 登入視窗...";
+            try {
+              const result = await signInWithPopup(auth, provider);
+              if (result?.user) {
+                $("#dataMode").textContent = `Google 登入完成：${result.user.email || result.user.displayName || "已登入"}。正在同步資料...`;
+              }
+            } catch (popupError) {
+              const popupCode = popupError?.code || "";
+              if (popupCode === "auth/popup-closed-by-user") {
+                $("#dataMode").textContent = "Google 登入視窗已關閉，尚未完成登入。";
+                return;
+              }
+              console.warn("Google popup sign-in failed; falling back to redirect.", popupError);
+              $("#dataMode").textContent = "登入視窗無法完成，改用 Google 轉跳登入...";
+              await signInWithRedirect(auth, provider);
+            }
           }
         } catch (error) {
           console.error("Google sign-in failed", error);
