@@ -1541,8 +1541,13 @@
     }
 
     function captureDriveToken(result) {
-      const credential = googleAuthProviderApi?.credentialFromResult(result);
-      if (credential?.accessToken) driveAccessToken = credential.accessToken;
+      if (!result || !googleAuthProviderApi?.credentialFromResult) return;
+      try {
+        const credential = googleAuthProviderApi.credentialFromResult(result);
+        if (credential?.accessToken) driveAccessToken = credential.accessToken;
+      } catch (error) {
+        console.warn("Google credential result did not include a Drive token.", error);
+      }
     }
 
     async function ensureDriveAccess() {
