@@ -71,7 +71,7 @@ This lets the app create and manage files it uploads to the signed-in user's Dri
 - web view link
 - thumbnail link when Google provides one
 
-If Drive upload fails, the app falls back to local browser storage for that file.
+After each upload, the app grants `reader` permission to the emails currently listed in the trip companion list. Add companions before uploading files when possible. If Drive upload fails, the app falls back to local browser storage for that file.
 
 ## First Owner
 

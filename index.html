@@ -653,7 +653,7 @@
         <details class="info-group" open>
           <summary>文件票券</summary>
           <div class="info-body">
-            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。檔案會上傳到你的 Google Drive，這裡同步檔名、分類與開啟連結。</p>
+            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。檔案會上傳到你的 Google Drive，並自動分享給目前旅伴清單內的 email。</p>
             <form id="docForm">
               <div class="form-row">
                 <label>文件名稱
@@ -856,7 +856,7 @@
   <dialog id="settingsDialog">
     <div class="modal-body">
       <h2>Google 登入與同步設定</h2>
-      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。照片、PDF 與票券檔案不使用 Firebase Storage，改上傳到你的 Google Drive。</p>
+      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。照片、PDF 與票券檔案不使用 Firebase Storage，改上傳到你的 Google Drive，並分享給旅伴。</p>
       <h3>目前資料模式</h3>
       <p id="dataMode" class="status">讀取中...</p>
       <h3>旅伴共用編輯</h3>
@@ -869,7 +869,7 @@
       </form>
       <div class="list" id="memberList"></div>
       <h3>Firebase 權限規則提醒</h3>
-      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。檔案存在上傳者的 Google Drive，不經過 Firebase Storage。</p>
+      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。檔案存在上傳者的 Google Drive；上傳時會把檔案讀取權限分享給旅伴。</p>
       <div class="actions">
         <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
         <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
@@ -1622,10 +1622,40 @@
       return upload.json();
     }
 
+    async function shareDriveFileWithMembers(fileId) {
+      if (!fileId) return [];
+      const recipients = state.members
+        .map((email) => email.trim().toLowerCase())
+        .filter((email) => email && email !== currentUser?.email?.toLowerCase());
+      const uniqueRecipients = [...new Set(recipients)];
+      const failures = [];
+      for (const email of uniqueRecipients) {
+        try {
+          await driveFetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/permissions?sendNotificationEmail=false&fields=id`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+            body: JSON.stringify({
+              type: "user",
+              role: "reader",
+              emailAddress: email
+            })
+          });
+        } catch (error) {
+          console.warn(`Unable to share Drive file with ${email}`, error);
+          failures.push(email);
+        }
+      }
+      if (failures.length) {
+        $("#dataMode").textContent = `檔案已上傳，但 ${failures.length} 位旅伴的 Drive 分享失敗，請稍後重試或手動分享。`;
+      }
+      return failures;
+    }
+
     async function uploadCloudPhotos() {
       if (!currentUser || !state.photoFiles.length) return state.photos;
       try {
         const uploads = await Promise.all(state.photoFiles.map((file) => uploadDriveFile(file, "journal")));
+        await Promise.all(uploads.map((file) => shareDriveFileWithMembers(file.id)));
         return uploads.map((file) => ({
           driveFileId: file.id,
           name: file.name,
@@ -1646,6 +1676,7 @@
       if (!currentUser || !file) return null;
       try {
         const uploaded = await uploadDriveFile(file, "document");
+        await shareDriveFileWithMembers(uploaded.id);
         return {
           driveFileId: uploaded.id,
           url: uploaded.webContentLink || uploaded.webViewLink,
