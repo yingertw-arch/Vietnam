@@ -528,7 +528,7 @@
         <span class="chip">會安・峴港・順化</span>
         <span class="chip">1 NTD 約 760-800 VND</span>
       </div>
-      <div class="next-peek">往下滑看每日路線；登入後可同步花費、心得、照片與文件。</div>
+      <div class="next-peek">往下滑看每日路線，登入後可一起記帳、寫心得、存照片與票券。</div>
     </div>
   </header>
 
@@ -551,8 +551,8 @@
 
     <section class="panel" id="expenses">
       <div class="section-head">
-        <h2>花費總覽與登入</h2>
-        <span>顯示整趟旅程目前累積支出；新增時可選日期。</span>
+        <h2>花費總覽</h2>
+        <span>記錄每日支出與旅前共同費用，幫整趟旅程抓住預算。</span>
       </div>
       <div class="tool-card">
         <form id="expenseForm">
@@ -616,7 +616,7 @@
     <section class="panel" id="journal">
       <div class="section-head">
         <h2>旅遊心得與照片</h2>
-        <span>依照每天列出心得；新增時預設為目前選取日期。</span>
+        <span>把每天的片段、照片和想記住的小事留在同一份手冊裡。</span>
       </div>
       <div class="tool-card">
         <form id="journalForm">
@@ -646,14 +646,14 @@
 
     <section class="panel" id="other">
       <div class="section-head">
-        <h2>其他資料</h2>
-        <span>原本網頁的預訂、費用、餐廳、禁忌、來源集中在這裡。</span>
+        <h2>旅行資料夾</h2>
+        <span>票券、離線地圖、預訂提醒、餐廳與注意事項都放在這裡。</span>
       </div>
       <div class="other-stack">
         <details class="info-group" open>
           <summary>文件票券</summary>
           <div class="info-body">
-            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。檔案會上傳到你的 Google Drive，並自動分享給目前旅伴清單內的 email。</p>
+            <p class="install-note">收 eVisa、機票、訂房確認、Klook/KKday QR code 和交通票券。先把旅伴加進清單，上傳後檔案會放到你的 Google Drive 並分享給他們。</p>
             <form id="docForm">
               <div class="form-row">
                 <label>文件名稱
@@ -855,12 +855,12 @@
 
   <dialog id="settingsDialog">
     <div class="modal-body">
-      <h2>Google 登入與同步設定</h2>
-      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。照片、PDF 與票券檔案不使用 Firebase Storage，改上傳到你的 Google Drive，並分享給旅伴。</p>
-      <h3>目前資料模式</h3>
+      <h2>共用旅行手冊</h2>
+      <p class="install-note">登入後，大家可以一起更新花費、心得、住宿與旅伴清單。照片和票券會存到上傳者的 Google Drive，並分享給清單內的旅伴。</p>
+      <h3>同步狀態</h3>
       <p id="dataMode" class="status">讀取中...</p>
-      <h3>旅伴共用編輯</h3>
-      <p class="status">輸入旅伴的 Google 帳號 email。Firebase 設定完成後，清單內的人登入即可一起編輯同一份旅行資料。</p>
+      <h3>旅伴清單</h3>
+      <p class="status">輸入旅伴的 Google email。清單內的人登入後可以一起編輯，也會收到之後上傳檔案的讀取權限。</p>
       <form id="memberForm">
         <label>旅伴 Google email
           <input id="memberEmail" type="email" placeholder="friend@gmail.com" />
@@ -868,11 +868,11 @@
         <button class="btn primary" type="submit">加入旅伴</button>
       </form>
       <div class="list" id="memberList"></div>
-      <h3>Firebase 權限規則提醒</h3>
-      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。檔案存在上傳者的 Google Drive；上傳時會把檔案讀取權限分享給旅伴。</p>
+      <h3>檔案分享提醒</h3>
+      <p class="status">建議先加入旅伴再上傳照片或票券。先前已上傳的檔案若要補分享，請到 Google Drive 的 Vietnam Travel Handbook 資料夾手動調整權限。</p>
       <div class="actions">
-        <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
-        <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
+        <button class="btn warn" type="button" id="clearLocalBtn">清除這台手機資料</button>
+        <a class="map-link" href="https://drive.google.com/" target="_blank" rel="noreferrer">開啟 Google Drive</a>
         <button class="btn" type="button" id="closeSettingsDialog">關閉</button>
       </div>
     </div>
@@ -1553,12 +1553,12 @@
     async function ensureDriveAccess() {
       if (driveAccessToken) return driveAccessToken;
       if (!googleAuth || !googleProvider || !googleSignInWithPopup) {
-        throw new Error("Google Drive 尚未完成初始化，請重新整理後再試。");
+        throw new Error("雲端檔案功能還沒準備好，請重新整理後再試。");
       }
-      $("#dataMode").textContent = "需要 Google Drive 授權來同步照片與文件。";
+      $("#dataMode").textContent = "需要 Google Drive 授權，才能上傳照片與票券。";
       const result = await googleSignInWithPopup(googleAuth, googleProvider);
       captureDriveToken(result);
-      if (!driveAccessToken) throw new Error("沒有取得 Google Drive 上傳權限。");
+      if (!driveAccessToken) throw new Error("沒有取得 Google Drive 上傳權限。請重新登入後再試。");
       return driveAccessToken;
     }
 
@@ -1651,7 +1651,7 @@
         }
       }
       if (failures.length) {
-        $("#dataMode").textContent = `檔案已上傳，但 ${failures.length} 位旅伴的 Drive 分享失敗，請稍後重試或手動分享。`;
+        $("#dataMode").textContent = `檔案已上傳，但 ${failures.length} 位旅伴的分享失敗，請稍後重試或到 Google Drive 手動分享。`;
       }
       return failures;
     }
@@ -1672,7 +1672,7 @@
         }));
       } catch (error) {
         console.warn("Google Drive upload unavailable; keeping journal photos locally.", error);
-        alert(`Google Drive 照片上傳失敗，先保留在本機：${error.message || "請稍後再試"}`);
+        alert(`照片上傳到 Google Drive 失敗，先保留在這台手機：${error.message || "請稍後再試"}`);
         return state.photos;
       }
     }
@@ -1691,7 +1691,7 @@
         };
       } catch (error) {
         console.warn("Google Drive upload unavailable; keeping document locally.", error);
-        alert(`Google Drive 文件上傳失敗，先保留在本機：${error.message || "請稍後再試"}`);
+        alert(`文件上傳到 Google Drive 失敗，先保留在這台手機：${error.message || "請稍後再試"}`);
         return null;
       }
     }
@@ -1717,7 +1717,7 @@
       }
       const message = hasFirebaseConfig
         ? "請先使用 Google 登入，才能編輯共用旅程資料。"
-        : "目前尚未完成 Firebase 設定，暫時只能瀏覽行程，不能新增或修改共用資料。";
+        : "目前尚未完成雲端設定，暫時只能瀏覽行程，不能新增或修改共用資料。";
       $("#dataMode").textContent = message;
       alert(message);
       return false;
@@ -2042,7 +2042,7 @@
 
     $("#clearLocalBtn").addEventListener("click", () => {
       if (!requireEditor()) return;
-      if (!confirm("確定要清除這支手機上的花費、心得、住宿修改測試資料？")) return;
+      if (!confirm("確定要清除這支手機上的花費、心得、住宿修改與暫存檔案？雲端資料不會一起刪除。")) return;
       state.expenses = [];
       state.journals = [];
       state.hotels = {};
@@ -2064,12 +2064,12 @@
 
     async function setupAuth() {
       $("#dataMode").textContent = hasFirebaseConfig
-        ? "Firebase 設定已填入：文字資料使用 Firestore 同步；照片與 PDF 會上傳到 Google Drive。"
-        : "本機模式：資料存在這支手機的瀏覽器 localStorage。";
+        ? "已連上雲端：文字資料會同步，照片與票券會存到 Google Drive。"
+        : "離線模式：資料只存在這支手機的瀏覽器。";
 
       if (!hasFirebaseConfig) {
         $("#loginBtn").addEventListener("click", () => {
-          alert("尚未填入 Firebase 設定。填入後即可使用 Google 帳號登入與雲端同步。");
+          alert("雲端同步尚未設定完成，目前只能瀏覽行程。");
         });
         return;
       }
@@ -2105,7 +2105,7 @@
         authReady = true;
         const code = error?.code || "";
         const message = code === "auth/unauthorized-domain"
-          ? "這個網址還沒有加入 Firebase Authentication 的 Authorized domains。請在 Firebase 加入 yingertw-arch.github.io。"
+          ? "這個網址還沒有被允許使用 Google 登入，請檢查登入網域設定。"
           : `Google 登入轉跳失敗：${code || error?.message || "請稍後再試"}`;
         $("#dataMode").textContent = message;
         alert(message);
@@ -2138,7 +2138,7 @@
           console.error("Google sign-in failed", error);
           const code = error?.code || "";
           const message = code === "auth/unauthorized-domain"
-            ? "這個網址還沒有加入 Firebase Authentication 的 Authorized domains。請在 Firebase 加入 yingertw-arch.github.io；本機測試則加入 127.0.0.1。"
+            ? "這個網址還沒有被允許使用 Google 登入，請檢查登入網域設定。"
             : `Google 登入失敗：${code || error?.message || "請稍後再試"}`;
           $("#dataMode").textContent = message;
           alert(message);
@@ -2152,8 +2152,8 @@
           ? `<img src="${user.photoURL}" alt="" />${user.displayName || "已登入"}`
           : "使用 Google 登入";
         $("#dataMode").textContent = user
-          ? `共用旅程模式：已登入 ${user.email || user.displayName || "Google 帳號"}，文字資料會同步到旅程 ${tripId}。`
-          : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、住宿與旅伴清單。照片與 PDF 會要求 Google Drive 授權。";
+          ? `已登入 ${user.email || user.displayName || "Google 帳號"}。花費、心得與住宿會同步；上傳照片或票券時會存到 Google Drive。`
+          : "尚未登入。登入後可以同步花費、心得、住宿與旅伴清單，並上傳照片和票券。";
         if (user) loadCloudData();
         updateEditLock();
       });
