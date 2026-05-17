@@ -653,7 +653,7 @@
         <details class="info-group" open>
           <summary>文件票券</summary>
           <div class="info-body">
-            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。此專案不啟用 Firebase Storage，文件只會存在目前這台裝置；旅伴換手機時請另外備份重要檔案。</p>
+            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。檔案會上傳到你的 Google Drive，這裡同步檔名、分類與開啟連結。</p>
             <form id="docForm">
               <div class="form-row">
                 <label>文件名稱
@@ -856,7 +856,7 @@
   <dialog id="settingsDialog">
     <div class="modal-body">
       <h2>Google 登入與同步設定</h2>
-      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。此專案維持免費方案，不啟用 Firebase Storage；照片、PDF 與票券檔案只保存在目前這台裝置。</p>
+      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。照片、PDF 與票券檔案不使用 Firebase Storage，改上傳到你的 Google Drive。</p>
       <h3>目前資料模式</h3>
       <p id="dataMode" class="status">讀取中...</p>
       <h3>旅伴共用編輯</h3>
@@ -869,7 +869,7 @@
       </form>
       <div class="list" id="memberList"></div>
       <h3>Firebase 權限規則提醒</h3>
-      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。Storage 不啟用，重要文件請另外存在雲端硬碟或手機相簿。</p>
+      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。檔案存在上傳者的 Google Drive，不經過 Firebase Storage。</p>
       <div class="actions">
         <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
         <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
@@ -1019,6 +1019,12 @@
     let cloud = null;
     let currentUser = null;
     let authReady = !hasFirebaseConfig;
+    let googleAuth = null;
+    let googleProvider = null;
+    let googleAuthProviderApi = null;
+    let googleSignInWithPopup = null;
+    let driveAccessToken = "";
+    let driveFolderId = "";
     const categoryColors = {
       "交通": "#0f5a49",
       "餐飲": "#d49a2a",
@@ -1380,11 +1386,18 @@
         const dayJournals = state.journals.filter((item) => item.date === dateValue);
         const records = dayJournals.length ? dayJournals.map((item) => {
           const index = state.journals.indexOf(item);
+          const photos = (item.photos || []).map((photo) => {
+            const src = typeof photo === "string" ? photo : (photo.thumbnailLink || photo.url || photo.webViewLink || "");
+            const href = typeof photo === "string" ? photo : (photo.webViewLink || photo.url || src);
+            return src
+              ? `<a href="${href}" target="_blank" rel="noreferrer"><img src="${src}" alt="旅遊照片" loading="lazy" /></a>`
+              : "";
+          }).join("");
           return `
             <article class="record">
               <strong><span>${item.place || "旅行紀錄"}</span><span>${item.date}</span></strong>
               <small>${item.text}</small>
-              ${item.photos?.length ? `<div class="photos">${item.photos.map((src) => `<img src="${src}" alt="旅遊照片" loading="lazy" />`).join("")}</div>` : ""}
+              ${photos ? `<div class="photos">${photos}</div>` : ""}
               <button class="btn" type="button" data-remove-journal="${index}">刪除</button>
             </article>
           `;
@@ -1435,8 +1448,10 @@
     function renderDocs() {
       $("#docList").innerHTML = state.docs.length ? state.docs.map((doc, index) => {
         const isImage = doc.type?.startsWith("image/");
+        const openUrl = doc.webViewLink || doc.url;
+        const previewUrl = doc.thumbnailLink || doc.url;
         const preview = isImage
-          ? `<img src="${doc.url}" alt="${doc.title}" loading="lazy" />`
+          ? `<img src="${previewUrl}" alt="${doc.title}" loading="lazy" />`
           : `<div class="install-note">PDF 文件：${doc.fileName}</div>`;
         return `
           <article class="doc-card">
@@ -1445,7 +1460,7 @@
             <strong>${doc.title}</strong>
             <small>${doc.fileName}</small>
             <div class="actions">
-              <a class="map-link primary" href="${doc.url}" target="_blank" rel="noreferrer">開啟</a>
+              <a class="map-link primary" href="${openUrl}" target="_blank" rel="noreferrer">開啟</a>
               <button class="btn" type="button" data-remove-doc="${index}">刪除</button>
             </div>
           </article>
@@ -1525,34 +1540,123 @@
       await deleteDoc(doc(cloud.db, "trips", tripId, type, id));
     }
 
+    function captureDriveToken(result) {
+      const credential = googleAuthProviderApi?.credentialFromResult(result);
+      if (credential?.accessToken) driveAccessToken = credential.accessToken;
+    }
+
+    async function ensureDriveAccess() {
+      if (driveAccessToken) return driveAccessToken;
+      if (!googleAuth || !googleProvider || !googleSignInWithPopup) {
+        throw new Error("Google Drive 尚未完成初始化，請重新整理後再試。");
+      }
+      $("#dataMode").textContent = "需要 Google Drive 授權來同步照片與文件。";
+      const result = await googleSignInWithPopup(googleAuth, googleProvider);
+      captureDriveToken(result);
+      if (!driveAccessToken) throw new Error("沒有取得 Google Drive 上傳權限。");
+      return driveAccessToken;
+    }
+
+    async function driveFetch(url, options = {}) {
+      const token = await ensureDriveAccess();
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(options.headers || {})
+        }
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Google Drive API ${response.status}: ${text || response.statusText}`);
+      }
+      return response;
+    }
+
+    async function ensureDriveFolder() {
+      if (driveFolderId) return driveFolderId;
+      const folderName = "Vietnam Travel Handbook";
+      const q = encodeURIComponent(`mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`);
+      const search = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name)&pageSize=1`);
+      const result = await search.json();
+      if (result.files?.[0]?.id) {
+        driveFolderId = result.files[0].id;
+        return driveFolderId;
+      }
+      const create = await driveFetch("https://www.googleapis.com/drive/v3/files?fields=id,name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=UTF-8" },
+        body: JSON.stringify({
+          name: folderName,
+          mimeType: "application/vnd.google-apps.folder"
+        })
+      });
+      const folder = await create.json();
+      driveFolderId = folder.id;
+      return driveFolderId;
+    }
+
+    async function uploadDriveFile(file, kind) {
+      const folderId = await ensureDriveFolder();
+      const safeName = file.name.replace(/[^\w.\-\u4e00-\u9fff]/g, "_");
+      const boundary = `vietnam-drive-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const metadata = {
+        name: `${new Date().toISOString().slice(0, 10)}-${kind}-${safeName}`,
+        mimeType: file.type || "application/octet-stream",
+        parents: [folderId]
+      };
+      const body = new Blob([
+        `--${boundary}\r\n`,
+        "Content-Type: application/json; charset=UTF-8\r\n\r\n",
+        JSON.stringify(metadata),
+        `\r\n--${boundary}\r\n`,
+        `Content-Type: ${metadata.mimeType}\r\n\r\n`,
+        file,
+        `\r\n--${boundary}--`
+      ], { type: `multipart/related; boundary=${boundary}` });
+      const upload = await driveFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink,webContentLink,thumbnailLink", {
+        method: "POST",
+        headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+        body
+      });
+      return upload.json();
+    }
+
     async function uploadCloudPhotos() {
-      if (!cloud || !currentUser || !state.photoFiles.length) return state.photos;
-      const { ref, uploadBytes, getDownloadURL } = cloud.storageApi;
+      if (!currentUser || !state.photoFiles.length) return state.photos;
       try {
-        const uploads = state.photoFiles.map(async (file) => {
-          const safeName = file.name.replace(/[^\w.-]/g, "_");
-          const photoRef = ref(cloud.storage, `trips/${tripId}/journals/${Date.now()}-${safeName}`);
-          await uploadBytes(photoRef, file);
-          return getDownloadURL(photoRef);
-        });
-        return await Promise.all(uploads);
+        const uploads = await Promise.all(state.photoFiles.map((file) => uploadDriveFile(file, "journal")));
+        return uploads.map((file) => ({
+          driveFileId: file.id,
+          name: file.name,
+          type: file.mimeType,
+          url: file.webContentLink || file.webViewLink,
+          webViewLink: file.webViewLink,
+          thumbnailLink: file.thumbnailLink || file.webContentLink || file.webViewLink,
+          provider: "google-drive"
+        }));
       } catch (error) {
-        console.warn("Storage upload unavailable; keeping journal photos locally.", error);
+        console.warn("Google Drive upload unavailable; keeping journal photos locally.", error);
+        alert(`Google Drive 照片上傳失敗，先保留在本機：${error.message || "請稍後再試"}`);
         return state.photos;
       }
     }
 
     async function uploadCloudDoc(file) {
-      if (!cloud || !currentUser || !file) return "";
-      const { ref, uploadBytes, getDownloadURL } = cloud.storageApi;
+      if (!currentUser || !file) return null;
       try {
-        const safeName = file.name.replace(/[^\w.-]/g, "_");
-        const docRef = ref(cloud.storage, `trips/${tripId}/docs/${Date.now()}-${safeName}`);
-        await uploadBytes(docRef, file);
-        return getDownloadURL(docRef);
+        const uploaded = await uploadDriveFile(file, "document");
+        return {
+          driveFileId: uploaded.id,
+          url: uploaded.webContentLink || uploaded.webViewLink,
+          webViewLink: uploaded.webViewLink,
+          thumbnailLink: uploaded.thumbnailLink || "",
+          provider: "google-drive"
+        };
       } catch (error) {
-        console.warn("Storage upload unavailable; keeping document locally.", error);
-        return "";
+        console.warn("Google Drive upload unavailable; keeping document locally.", error);
+        alert(`Google Drive 文件上傳失敗，先保留在本機：${error.message || "請稍後再試"}`);
+        return null;
       }
     }
 
@@ -1785,13 +1889,14 @@
         $("#docStatus").textContent = "請先選擇 PDF 或圖片。";
         return;
       }
-      let url = await uploadCloudDoc(file);
-      if (!url) {
-        url = await new Promise((resolve) => {
+      let driveFile = await uploadCloudDoc(file);
+      if (!driveFile?.url) {
+        const localUrl = await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
           reader.readAsDataURL(file);
         });
+        driveFile = { url: localUrl, provider: "local" };
       }
       const item = {
         title: $("#docTitle").value.trim(),
@@ -1803,7 +1908,11 @@
         expenseCategory: $("#docExpenseCategory").value,
         fileName: file.name,
         type: file.type,
-        url,
+        url: driveFile.url,
+        webViewLink: driveFile.webViewLink || driveFile.url,
+        thumbnailLink: driveFile.thumbnailLink || "",
+        driveFileId: driveFile.driveFileId || "",
+        provider: driveFile.provider || "local",
         createdAt: new Date().toISOString()
       };
       item.id = await saveCloudRecord("docs", item);
@@ -1919,7 +2028,7 @@
 
     async function setupAuth() {
       $("#dataMode").textContent = hasFirebaseConfig
-        ? "Firebase 設定已填入：文字資料可使用 Firestore 雲端同步；照片與 PDF 仍保留在本機。"
+        ? "Firebase 設定已填入：文字資料使用 Firestore 同步；照片與 PDF 會上傳到 Google Drive。"
         : "本機模式：資料存在這支手機的瀏覽器 localStorage。";
 
       if (!hasFirebaseConfig) {
@@ -1942,9 +2051,16 @@
         storageApi
       };
       const provider = new GoogleAuthProvider();
+      provider.addScope("https://www.googleapis.com/auth/drive.file");
+      provider.setCustomParameters({ include_granted_scopes: "true" });
+      googleAuth = auth;
+      googleProvider = provider;
+      googleAuthProviderApi = GoogleAuthProvider;
+      googleSignInWithPopup = signInWithPopup;
       await setPersistence(auth, browserLocalPersistence);
       try {
         const redirectResult = await getRedirectResult(auth);
+        captureDriveToken(redirectResult);
         if (redirectResult?.user) {
           $("#dataMode").textContent = `Google 登入完成：${redirectResult.user.email || redirectResult.user.displayName || "已登入"}。正在同步資料...`;
         }
@@ -1967,6 +2083,7 @@
             $("#dataMode").textContent = "正在開啟 Google 登入視窗...";
             try {
               const result = await signInWithPopup(auth, provider);
+              captureDriveToken(result);
               if (result?.user) {
                 $("#dataMode").textContent = `Google 登入完成：${result.user.email || result.user.displayName || "已登入"}。正在同步資料...`;
               }
@@ -2000,7 +2117,7 @@
           : "使用 Google 登入";
         $("#dataMode").textContent = user
           ? `共用旅程模式：已登入 ${user.email || user.displayName || "Google 帳號"}，文字資料會同步到旅程 ${tripId}。`
-          : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、住宿與旅伴清單。照片與 PDF 仍只存在本機。";
+          : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、住宿與旅伴清單。照片與 PDF 會要求 Google Drive 授權。";
         if (user) loadCloudData();
         updateEditLock();
       });

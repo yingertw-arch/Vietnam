@@ -1,6 +1,6 @@
 # Firebase Setup
 
-The handbook runs locally without Firebase. Enable Firebase when you want Google sign-in, companion editing, and Firestore sync for trip text data.
+The handbook runs locally without Firebase. Enable Firebase when you want Google sign-in, companion editing, and Firestore sync for trip text data. Files use Google Drive instead of Firebase Storage.
 
 ## Firebase Console
 
@@ -11,7 +11,8 @@ The handbook runs locally without Firebase. Enable Firebase when you want Google
 5. Enable Authentication > Sign-in method > Google.
 6. Create Firestore Database.
 7. Publish `firestore.rules` to Firestore Rules.
-8. Do not enable Storage on the free Spark plan. PDFs, receipts, and photos intentionally stay in local browser storage.
+8. Do not enable Storage on the free Spark plan. PDFs, receipts, and photos upload to Google Drive after the user grants Drive access.
+9. In the linked Google Cloud project, enable Google Drive API for Drive uploads.
 
 ## GitHub Pages
 
@@ -54,11 +55,29 @@ firebase deploy --only firestore:rules
 
 Storage rules are kept in the repository for a future Blaze upgrade, but Storage is not enabled for this launch.
 
+## Google Drive Files
+
+The app requests this Google OAuth scope during sign-in:
+
+```text
+https://www.googleapis.com/auth/drive.file
+```
+
+This lets the app create and manage files it uploads to the signed-in user's Drive. The app creates or reuses a Drive folder named `Vietnam Travel Handbook`, uploads photos/PDFs there, and stores file metadata in Firestore:
+
+- Drive file id
+- file name
+- MIME type
+- web view link
+- thumbnail link when Google provides one
+
+If Drive upload fails, the app falls back to local browser storage for that file.
+
 ## First Owner
 
 The first signed-in user creates the trip member document for themselves. Add travel companions in the site under `設定 > 旅伴共用編輯`.
 
-Firestore text data syncs across signed-in members. Uploaded PDFs, receipts, and photos stay in local browser storage and should be backed up separately.
+Firestore text data syncs across signed-in members. Uploaded PDFs, receipts, and photos use Google Drive links when Drive authorization succeeds.
 
 The current shared trip id is configured in `trip-data.js`:
 
