@@ -1,6 +1,6 @@
 # Firebase Setup
 
-The handbook runs locally without Firebase. Enable Firebase when you want Google sign-in, companion editing, cross-device sync, and cloud document storage.
+The handbook runs locally without Firebase. Enable Firebase when you want Google sign-in, companion editing, and Firestore sync for trip text data.
 
 ## Firebase Console
 
@@ -11,12 +11,11 @@ The handbook runs locally without Firebase. Enable Firebase when you want Google
 5. Enable Authentication > Sign-in method > Google.
 6. Create Firestore Database.
 7. Publish `firestore.rules` to Firestore Rules.
-8. Optional: enable Storage only if you need cloud sync for PDFs, receipts, and photos.
-9. Optional: publish `storage.rules` to Storage Rules after Storage is enabled.
+8. Do not enable Storage on the free Spark plan. PDFs, receipts, and photos intentionally stay in local browser storage.
 
 ## GitHub Pages
 
-The repository keeps `firebase-config.js` blank so Firebase config values are not committed to Git history. Firebase Web API keys are public client identifiers, not server secrets, but they still need protected Authentication domains and Firestore/Storage rules. The GitHub Pages workflow creates `firebase-config.js` during deployment from repository secrets.
+The repository keeps `firebase-config.js` blank so Firebase config values are not committed to Git history. Firebase Web API keys are public client identifiers, not server secrets, but they still need protected Authentication domains and Firestore rules. The GitHub Pages workflow creates `firebase-config.js` during deployment from repository secrets.
 
 Add these secrets in GitHub repository Settings > Secrets and variables > Actions:
 
@@ -45,20 +44,21 @@ The current rules are scoped to this trip only:
 tripId: "vietnam-2026-da-nang"
 ```
 
-Firestore allows only signed-in trip members to read/write trip data. The first signed-in user can initialize this one trip and becomes the owner. Storage, if enabled, accepts only signed-in trip members and only PDF/image uploads under 10 MB.
+Firestore allows only signed-in trip members to read/write trip data. The first signed-in user can initialize this one trip and becomes the owner.
 
-Before publishing, deploy the rules:
+Before publishing, deploy Firestore rules:
 
 ```bash
 firebase deploy --only firestore:rules
-firebase deploy --only storage
 ```
+
+Storage rules are kept in the repository for a future Blaze upgrade, but Storage is not enabled for this launch.
 
 ## First Owner
 
 The first signed-in user creates the trip member document for themselves. Add travel companions in the site under `設定 > 旅伴共用編輯`.
 
-If Storage is not enabled, Firestore text data still syncs. Uploaded PDFs, receipts, and photos fall back to local browser storage.
+Firestore text data syncs across signed-in members. Uploaded PDFs, receipts, and photos stay in local browser storage and should be backed up separately.
 
 The current shared trip id is configured in `trip-data.js`:
 

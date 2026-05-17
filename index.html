@@ -653,7 +653,7 @@
         <details class="info-group" open>
           <summary>文件票券</summary>
           <div class="info-body">
-            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。未設定 Firebase 前會存在這台裝置；Firebase 設定後會上傳到 Storage 供旅伴查看。</p>
+            <p class="install-note">可放 eVisa PDF、機票截圖、訂房確認、Klook/KKday QR code、交通票券。此專案不啟用 Firebase Storage，文件只會存在目前這台裝置；旅伴換手機時請另外備份重要檔案。</p>
             <form id="docForm">
               <div class="form-row">
                 <label>文件名稱
@@ -856,7 +856,7 @@
   <dialog id="settingsDialog">
     <div class="modal-body">
       <h2>Google 登入與同步設定</h2>
-      <p class="install-note">要讓 Google 帳號登入、花費、心得和照片跨手機同步，需要建立 Firebase 專案，啟用 Authentication 的 Google provider、Firestore 和 Storage，然後把 Firebase 設定填進本檔案的 <b>firebaseConfig</b>。</p>
+      <p class="install-note">Google 登入和 Firestore 會同步花費、心得、住宿修改與旅伴清單。此專案維持免費方案，不啟用 Firebase Storage；照片、PDF 與票券檔案只保存在目前這台裝置。</p>
       <h3>目前資料模式</h3>
       <p id="dataMode" class="status">讀取中...</p>
       <h3>旅伴共用編輯</h3>
@@ -869,7 +869,7 @@
       </form>
       <div class="list" id="memberList"></div>
       <h3>Firebase 權限規則提醒</h3>
-      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。Storage 照同樣概念限制 <b>trips/vietnam-2026-da-nang</b> 路徑。</p>
+      <p class="status">Firestore Rules 需限制只有 members 清單內的 email 可以讀寫，例如：只允許 <b>trips/{tripId}/members/{request.auth.token.email}</b> 存在的人存取該旅程。Storage 不啟用，重要文件請另外存在雲端硬碟或手機相簿。</p>
       <div class="actions">
         <button class="btn warn" type="button" id="clearLocalBtn">清除本機測試資料</button>
         <a class="map-link" href="https://console.firebase.google.com/" target="_blank" rel="noreferrer">開啟 Firebase Console</a>
@@ -1908,7 +1908,7 @@
 
     async function setupAuth() {
       $("#dataMode").textContent = hasFirebaseConfig
-        ? "Firebase 設定已填入：可以改成雲端同步模式。"
+        ? "Firebase 設定已填入：文字資料可使用 Firestore 雲端同步；照片與 PDF 仍保留在本機。"
         : "本機模式：資料存在這支手機的瀏覽器 localStorage。";
 
       if (!hasFirebaseConfig) {
@@ -1956,8 +1956,8 @@
           ? `<img src="${user.photoURL}" alt="" />${user.displayName || "已登入"}`
           : "使用 Google 登入";
         $("#dataMode").textContent = user
-          ? `共用旅程模式：已登入 ${user.email || user.displayName || "Google 帳號"}，資料會同步到旅程 ${tripId}。`
-          : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、照片與旅伴清單。";
+          ? `共用旅程模式：已登入 ${user.email || user.displayName || "Google 帳號"}，文字資料會同步到旅程 ${tripId}。`
+          : "Firebase 已設定，但尚未登入；登入後會同步花費、心得、住宿與旅伴清單。照片與 PDF 仍只存在本機。";
         if (user) loadCloudData();
         updateEditLock();
       });
