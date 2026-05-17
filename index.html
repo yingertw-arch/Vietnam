@@ -471,6 +471,23 @@
     .modal-body h2 { margin: 0 0 8px; font-size: 1.22rem; }
     .modal-body p { margin: 0; color: var(--muted); }
     .modal-body .actions { margin-top: 14px; }
+    .place-links {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .place-links a {
+      display: block;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--hoi);
+      font-weight: 800;
+      text-decoration: none;
+    }
 
     @media (max-width: 780px) {
       .topbar {
@@ -808,6 +825,8 @@
     <div class="modal-body">
       <h2 id="placeTitle">景點介紹</h2>
       <p id="placeIntro"></p>
+      <h3>參考遊記</h3>
+      <ul class="place-links" id="placeLinks"></ul>
       <div class="actions">
         <a class="map-link primary" id="placeMap" href="#" target="_blank" rel="noreferrer">開 Google Maps</a>
         <button class="btn" type="button" id="closePlaceDialog">關閉</button>
@@ -916,6 +935,58 @@
       "Linh Ung Pagoda Son Tra Da Nang": "山茶半島上的靈應寺可看海景與大型觀音像，適合作為彈性日行程。"
     };
 
+    const defaultPlaceReferences = {
+      "Hoi An Ancient Town": [
+        ["會安自由行攻略｜Pengu Travel", "https://pengu777.com/hoian-travel/"]
+      ],
+      "Hoi An Memories Show": [
+        ["會安印象秀心得｜Wander with Debbie", "https://debbiechien.com/hoi-an-memories-show/"],
+        ["印象會安交通票價｜Teresa 的旅遊筆記", "https://www.teresablog.com/blog/post/hoi-an-memories-show"]
+      ],
+      "Cham Island Hoi An": [
+        ["占婆島潛水與島上心得｜方格子", "https://vocus.cc/article/676e7061fd8978000140a480"],
+        ["Cham Island 完整旅遊指南｜Local Vietnam", "https://localvietnam.com/quang-nam/hoi-an/cham-island-travel-guide/"]
+      ],
+      "My Son Sanctuary": [
+        ["美山聖地半日遊｜Wander with Debbie", "https://debbiechien.com/my-son-sanctuary/"],
+        ["美山聖地｜肉比頭", "https://zoebitalk.com/central-vietnam-my-son/"]
+      ],
+      "VinWonders Nam Hoi An": [
+        ["VinWonders 官方資訊", "https://vinwonders.com/vinwonders-nam-hoi-an/"]
+      ],
+      "Marble Mountains Da Nang": [
+        ["五行山攻略｜Wander with Debbie", "https://debbiechien.com/marble-mountains/"],
+        ["五行山漫遊｜許傑旅行圖中", "https://journey.tw/marble-mountain/"]
+      ],
+      "My Khe Beach Da Nang": [
+        ["峴港景點整理｜肉比頭", "https://zoebitalk.com/vietnam/central-vietnam/da-nang/"]
+      ],
+      "Dragon Bridge Da Nang": [
+        ["峴港景點整理｜肉比頭", "https://zoebitalk.com/vietnam/central-vietnam/da-nang/"]
+      ],
+      "Han Market Da Nang": [
+        ["峴港景點整理｜肉比頭", "https://zoebitalk.com/vietnam/central-vietnam/da-nang/"]
+      ],
+      "Imperial City Hue": [
+        ["順化自由行與皇城｜肉比頭", "https://zoebitalk.com/vietnam/central-vietnam/hue/"],
+        ["順化一日遊｜時空旅人札記", "https://blog.travelhackfun.com/hue-day-trip/"]
+      ],
+      "Thien Mu Pagoda Hue": [
+        ["順化一日遊含天姥寺｜時空旅人札記", "https://blog.travelhackfun.com/hue-day-trip/"]
+      ],
+      "Ba Na Hills Da Nang": [
+        ["巴拿山攻略｜混血珊莎", "https://sansalife.tw/ba-na-hills/"],
+        ["巴拿山與金橋攻略｜Eva 旅遊", "https://evatravel.tw/ba-na-hills/"]
+      ],
+      "Golden Bridge Ba Na Hills": [
+        ["巴拿山攻略｜混血珊莎", "https://sansalife.tw/ba-na-hills/"],
+        ["巴拿山與金橋攻略｜Eva 旅遊", "https://evatravel.tw/ba-na-hills/"]
+      ],
+      "Linh Ung Pagoda Son Tra Da Nang": [
+        ["峴港景點整理｜肉比頭", "https://zoebitalk.com/vietnam/central-vietnam/da-nang/"]
+      ]
+    };
+
     const defaultDays = [
       { date: "7/18", weekday: "六", city: "hoi", title: "抵達峴港，前往會安", hotel: "MaiChi Villa", note: "機場到會安約 45-55 分鐘，晚上安排會安印象秀。", stops: [
         ["08:50", "抵達峴港國際機場", "領行李後用 Grab 前往會安。", "Da Nang International Airport"],
@@ -984,6 +1055,7 @@
     ];
 
     const placeDetails = tripConfig.placeDetails || defaultPlaceDetails;
+    const placeReferences = tripConfig.placeReferences || defaultPlaceReferences;
     const days = tripConfig.days || defaultDays;
 
     const state = {
@@ -1764,8 +1836,14 @@
       if (placeQuery) {
         const query = decodeURIComponent(placeQuery);
         const name = decodeURIComponent(placeTarget.dataset.placeName || placeQuery);
+        const references = placeReferences[query] || [];
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${name} ${query} 部落格 遊記`)}`;
         $("#placeTitle").textContent = name;
         $("#placeIntro").textContent = placeDetails[query] || "這個地點目前還沒有詳細介紹，先用地圖確認位置與營業資訊。";
+        $("#placeLinks").innerHTML = references
+          .concat([["搜尋更多部落格遊記", searchUrl]])
+          .map(([label, url]) => `<li><a href="${url}" target="_blank" rel="noreferrer">${label}</a></li>`)
+          .join("");
         $("#placeMap").href = mapUrl(query);
         $("#placeDialog").showModal();
       }
